@@ -1,0 +1,23 @@
+{
+  "name": "api-rest-campusride",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0",
+    "express-myconnection": "^1.0.4",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.11.3",
+    "nodemailer": "^6.9.15"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

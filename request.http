@@ -1,0 +1,28 @@
+### Solicitud para obtener la API
+GET http://localhost:9001/api HTTP/1.1
+
+### Solicitud para obtener todos los usuarios
+GET http://localhost:9001/api/usuarios HTTP/1.1
+
+### Solicitud para iniciar sesión
+POST http://localhost:9001/api/login
+Content-Type: application/json
+
+{
+    "correo": "camilo.fernandez@example.com",
+    "contraseña": "miContraseñaSegura"
+}
+
+### Solicitud para crear un nuevo usuario
+POST http://localhost:9001/api/newUser
+Content-Type: application/json
+
+{
+    "nombre": "Camilo",
+    "apellido": "Fernández",
+    "correo": "camilo.fernandez@example.com",
+    "telefono": "9876543210",
+    "direccion": "Avenida Siempre Viva 742",
+    "fecha_nacimiento": "1995-05-15",
+    "contraseña": "miContraseñaSegura"
+}
