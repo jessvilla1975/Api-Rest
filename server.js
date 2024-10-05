@@ -9,11 +9,11 @@ app.use(express.json());
 
 // Crear una conexión a la base de datos usando mysql2
 const connection = mysql.createConnection({
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: '1234',
-    database: 'bdcampus'
+    host: process.env.DB_HOST || 'localhost', // Cambiado a la variable de entorno
+    port: process.env.DB_PORT || 3306,         // Cambiado a la variable de entorno
+    user: process.env.DB_USERNAME || 'root',   // Cambiado a la variable de entorno
+    password: process.env.DB_PASSWORD || '1234',// Cambiado a la variable de entorno
+    database: process.env.DB_NAME || 'bdcampus'// Cambiado a la variable de entorno
 });
 
 // Conectar a la base de datos
@@ -22,7 +22,7 @@ connection.connect((err) => {
         console.error('Error connecting to the database:', err);
         return;
     }
-    console.log('Conexion exitosa a la BD');
+    console.log('Conexión exitosa a la BD');
 });
 
 // Usar rutas y pasar la conexión
