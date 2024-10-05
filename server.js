@@ -3,9 +3,15 @@ const mysql = require('mysql2');
 const routes = require('./routes');
 const app = express();
 app.set('port', process.env.PORT || 9001);
+const cors = require('cors');
+app.use(cors()); // Permite solicitudes desde cualquier origen
+
 
 // Middleware para analizar JSON
 app.use(express.json());
+
+
+
 
 // Crear una conexión a la base de datos usando mysql2
 const connection = mysql.createConnection({

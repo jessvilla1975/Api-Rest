@@ -13,6 +13,8 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+
+
 // Ruta para nuevo usuario--------------------------------
 routes.post('/newUser', (req, res) => {
     const { nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña } = req.body;

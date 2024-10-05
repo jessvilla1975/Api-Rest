@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.21.0",
     "express-myconnection": "^1.0.4",
     "mysql": "^2.18.1",
