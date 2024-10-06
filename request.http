@@ -20,12 +20,39 @@ Content-Type: application/json
 {
         "id": 3,
         "genero": "Femenino",
-        "nombre": "Ana",
-        "apellido": "Gómez",
-        "correo": "ana.gomez@example.com",
+        "nombre": "jess",
+        "apellido": "villa",
+        "correo": "jess@example.com",
         "telefono": "9876543210",
         "direccion": "Avenida Siempre Viva 456",
-        "fecha_nacimiento": "1995-05-15T00:00:00.000Z",
-        "contraseña": "123123",
-        "codigo_verificacion": null
+        "fecha_nacimiento": "1995-05-15",
+        "contraseña": "123123"
+        
 }
+
+POST https://api-rest-vo9r.onrender.com/api/newConductor
+Content-Type: application/json
+
+{
+        
+    "id": "5",
+    "genero": "Masculino",
+    "nombre": "Naruto",
+    "apellido": "Usumaki",
+    "correo": "naruto@gmail.com",
+    "telefono": "+573137895048",
+    "direccion": "cra 8",
+    "fecha_nacimiento": "2024-10-01",
+    "contraseña": "789789",
+    "numero_licencia": "789789789",
+    "fecha_vencimiento": "2026-12-31",
+    "placa": "123456",
+    "marca": "Honda",
+    "modelo": "CBR",
+    "ano": "2020",
+    "color": "Negro",
+    "capacidad_pasajeros": "2"
+}
+
+        
+

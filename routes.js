@@ -142,4 +142,136 @@ routes.post('/login', (req, res) => {
     });
 });
 
+
+
+// Ruta para nuevo conductor
+// Ruta para nuevo conductor
+routes.post('/newConductor', (req, res) => {
+    const { 
+        id, 
+        nombre, 
+        apellido, 
+        correo, 
+        telefono, 
+        direccion, 
+        fecha_nacimiento, 
+        contraseña, 
+        genero, 
+        numero_licencia, 
+        fecha_vencimiento, 
+        placa, 
+        marca, 
+        modelo, 
+        ano, 
+        color, 
+        capacidad_pasajeros 
+    } = req.body;
+
+    // Validar que se reciban todos los campos necesarios
+    if (!id || !nombre || !apellido || !correo || !contraseña || !genero || 
+        !numero_licencia || !fecha_vencimiento || !placa || !marca || 
+        !modelo || !ano || !color || !capacidad_pasajeros) {
+        return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
+    }
+
+    // Generar un código de verificación aleatorio
+    const codigo_verificacion = crypto.randomInt(100000, 999999).toString(); // Código de 6 dígitos
+
+    // Consulta SQL para insertar un nuevo usuario
+    const queryUsuario = `
+        INSERT INTO usuarios (id, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    // Consulta SQL para insertar un nuevo conductor
+    const queryConductor = `
+        INSERT INTO conductores (id, genero, nombre, apellido, numero_licencia, fecha_vencimiento)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    // Consulta SQL para insertar el vehículo
+    const queryVehiculo = `
+        INSERT INTO vehiculos (placa, marca, modelo, ano, color, capacidad_pasajeros, id_conductor)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    // Ejecutar las consultas en secuencia
+    req.connection.query(queryUsuario, [id, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion], (err, resultUsuario) => {
+        if (err) {
+            console.error('Error al insertar el usuario:', err);
+            return res.status(500).json({ error: 'Error al crear el usuario' });
+        }
+
+        req.connection.query(queryConductor, [id, genero, nombre, apellido, numero_licencia, fecha_vencimiento], (err, resultConductor) => {
+            if (err) {
+                console.error('Error al insertar el conductor:', err);
+                return res.status(500).json({ error: 'Error al crear el conductor' });
+            }
+
+            req.connection.query(queryVehiculo, [placa, marca, modelo, ano, color, capacidad_pasajeros, id], (err, resultVehiculo) => {
+                if (err) {
+                    console.error('Error al insertar el vehículo:', err);
+                    return res.status(500).json({ error: 'Error al crear el vehículo' });
+                }
+
+                // Enviar correo de verificación
+                const mailOptions = {
+                    from: "campusrideapps@gmail.com",
+                    to: correo,
+                    subject: "Código de Verificación de Campus Ride",
+                    html: `
+                      <html>
+                        <head>
+                          <style>
+                            body {
+                              font-family: Arial, sans-serif;
+                              background-color: #f4f4f4;
+                              padding: 20px;
+                            }
+                            .container {
+                              background-color: #fff;
+                              padding: 20px;
+                              border-radius: 8px;
+                              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                            }
+                            h1 {
+                              color: #333;
+                            }
+                            .code {
+                              font-size: 24px;
+                              font-weight: bold;
+                              color: #007BFF;
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <h1>Código de Verificación de Campus Ride</h1>
+                            <p>Hola, ${nombre}</p>
+                            <p>Tu código de verificación es:</p>
+                            <p class="code">${codigo_verificacion}</p>
+                            <p>¡Gracias por unirte a nosotros!</p>
+                            <p>Saludos,<br/>El equipo de Campus Ride</p>
+                          </div>
+                        </body>
+                      </html>
+                    `,
+                };
+
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error('Error al enviar el correo:', error);
+                        return res.status(500).json({ error: 'Error al enviar el correo de verificación' });
+                    }
+
+                    // Devolver una respuesta de éxito
+                    res.status(201).json({ message: 'Conductor y vehículo creados exitosamente. Se ha enviado un código de verificación a tu correo.', userId: id });
+                });
+            });
+        });
+    });
+});
+
+
+
 module.exports = routes;
