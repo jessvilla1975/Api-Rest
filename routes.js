@@ -17,10 +17,10 @@ const transporter = nodemailer.createTransport({
 
 // Ruta para nuevo usuario--------------------------------
 routes.post('/newUser', (req, res) => {
-    const { nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña } = req.body;
+    const { id, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, genero } = req.body;
 
     // Validar que se reciban todos los campos necesarios
-    if (!nombre || !apellido || !correo || !contraseña) {
+    if (!id || !nombre || !apellido || !correo || !contraseña || !genero) {
         return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
     }
 
@@ -29,12 +29,12 @@ routes.post('/newUser', (req, res) => {
 
     // Consulta SQL para insertar un nuevo usuario
     const query = `
-        INSERT INTO usuarios (nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO usuarios (id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     // Ejecutar la consulta usando req.connection
-    req.connection.query(query, [nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion], (err, result) => {
+    req.connection.query(query, [id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion], (err, result) => {
         if (err) {
             console.error('Error al insertar el usuario:', err);
             return res.status(500).json({ error: 'Error al crear el usuario' });
@@ -91,7 +91,7 @@ routes.post('/newUser', (req, res) => {
             }
 
             // Devolver una respuesta de éxito
-            res.status(201).json({ message: 'Usuario creado exitosamente. Se ha enviado un código de verificación a tu correo.', userId: result.insertId });
+            res.status(201).json({ message: 'Usuario creado exitosamente. Se ha enviado un código de verificación a tu correo.', userId: id });
         });
     });
 });

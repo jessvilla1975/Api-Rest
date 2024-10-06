@@ -1,28 +1,31 @@
 ### Solicitud para obtener la API
-GET http://localhost:9001/api HTTP/1.1
+GET https://api-rest-vo9r.onrender.com/api HTTP/1.1
 
 ### Solicitud para obtener todos los usuarios
-GET http://localhost:9001/api/usuarios HTTP/1.1
+GET https://api-rest-vo9r.onrender.com/api/usuarios HTTP/1.1
 
 ### Solicitud para iniciar sesión
-POST http://localhost:9001/api/login
+POST https://api-rest-vo9r.onrender.com/api/login
 Content-Type: application/json
 
 {
-    "correo": "camilo.fernandez@example.com",
-    "contraseña": "miContraseñaSegura"
+    "correo": "juan.perez@example.com",
+    "contraseña": "contraseña123"
 }
 
 ### Solicitud para crear un nuevo usuario
-POST http://localhost:9001/api/newUser
+POST https://api-rest-vo9r.onrender.com/api/newUser
 Content-Type: application/json
 
 {
-    "nombre": "Camilo",
-    "apellido": "Fernández",
-    "correo": "camilo.fernandez@example.com",
-    "telefono": "9876543210",
-    "direccion": "Avenida Siempre Viva 742",
-    "fecha_nacimiento": "1995-05-15",
-    "contraseña": "miContraseñaSegura"
+        "id": 3,
+        "genero": "Femenino",
+        "nombre": "Ana",
+        "apellido": "Gómez",
+        "correo": "ana.gomez@example.com",
+        "telefono": "9876543210",
+        "direccion": "Avenida Siempre Viva 456",
+        "fecha_nacimiento": "1995-05-15T00:00:00.000Z",
+        "contraseña": "123123",
+        "codigo_verificacion": null
 }
