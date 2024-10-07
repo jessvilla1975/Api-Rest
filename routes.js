@@ -169,7 +169,7 @@ routes.post('/newConductor', (req, res) => {
 
     // Validar que se reciban todos los campos necesarios
     if (!id || !nombre || !apellido || !correo || !contraseña || !genero || 
-        !numero_licencia || !fecha_vencimiento || !placa || !marca || 
+        !numero_licencia || !fecha_vencimiento || !id_placa || !marca || 
         !modelo || !ano || !color || !capacidad_pasajeros) {
         return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
     }
