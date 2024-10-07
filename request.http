@@ -56,8 +56,13 @@ Content-Type: application/json
         
 }
 
-### Solicitud para obtener todos los usuarios
+### Solicitud para obtener todos los conductores
 GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
+
+### Solicitud para obtener todos los vehiculos
+GET https://api-rest-vo9r.onrender.com/api/vehiculo HTTP/1.1
+
+
 
 
         
