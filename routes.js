@@ -272,6 +272,54 @@ routes.post('/newConductor', (req, res) => {
     });
 });
 
+// Ruta para obtener todos los conductores y sus vehículos
+routes.get('/conductores', (req, res) => {
+    // Consulta SQL para obtener todos los conductores y sus vehículos
+    const query = `
+        SELECT u.id, u.genero, u.nombre, u.apellido, u.correo, u.telefono, u.direccion, 
+               u.fecha_nacimiento, c.numero_licencia, c.fecha_vencimiento, 
+               v.placa, v.marca, v.modelo, v.ano, v.color, v.capacidad_pasajeros
+        FROM usuarios u
+        JOIN conductor c ON u.id = c.id_conductor
+        JOIN vehiculo v ON c.id_conductor = v.id_conductor
+    `;
+
+    req.connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener los conductores:', err);
+            return res.status(500).json({ error: 'Error al obtener los conductores' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron conductores' });
+        }
+
+        // Transformar los resultados para que se devuelvan en un formato amigable
+        const conductores = results.map(conductor => ({
+            id: conductor.id,
+            genero: conductor.genero,
+            nombre: conductor.nombre,
+            apellido: conductor.apellido,
+            correo: conductor.correo,
+            telefono: conductor.telefono,
+            direccion: conductor.direccion,
+            fecha_nacimiento: conductor.fecha_nacimiento,
+            numero_licencia: conductor.numero_licencia,
+            fecha_vencimiento: conductor.fecha_vencimiento,
+            vehiculo: {
+                placa: conductor.placa,
+                marca: conductor.marca,
+                modelo: conductor.modelo,
+                ano: conductor.ano,
+                color: conductor.color,
+                capacidad_pasajeros: conductor.capacidad_pasajeros
+            }
+        }));
+
+        // Devolver todos los conductores y sus vehículos
+        res.status(200).json(conductores);
+    });
+});
 
 
 module.exports = routes;
