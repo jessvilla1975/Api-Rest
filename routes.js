@@ -189,6 +189,34 @@ routes.post('/newConductor', (req, res) => {
     });
 });
 
+// ruta para agregar vehiculo------------------------------
+
+routes.post('/newVehiculo', (req, res) => {
+    const { id_placa, id_conductor, marca, modelo, ano, color, capacidad_pasajeros } = req.body;
+
+    // Validar que se reciban todos los campos necesarios
+    if (!id_placa || !id_conductor || !marca || !modelo || !ano || !color || !capacidad_pasajeros) {
+        return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
+    }
+
+    // Consulta SQL para insertar un nuevo vehículo
+    const query = `
+        INSERT INTO vehiculo (id_placa, id_conductor, marca, modelo, ano, color, capacidad_pasajeros)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    // Ejecutar la consulta usando req.connection
+    req.connection.query(query, [id_placa, id_conductor, marca, modelo, ano, color, capacidad_pasajeros], (err, result) => {
+        if (err) {
+            console.error('Error al insertar el vehículo:', err);
+            return res.status(500).json({ error: 'Error al crear el vehículo' });
+        }
+
+        // Devolver una respuesta de éxito
+        res.status(201).json({ message: 'Vehículo creado exitosamente.', vehiculoId: id_placa });
+    });
+});
+
 
 
 
