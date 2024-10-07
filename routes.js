@@ -159,7 +159,7 @@ routes.post('/newConductor', (req, res) => {
         genero, 
         numero_licencia, 
         fecha_vencimiento, 
-        placa, 
+        id_placa, 
         marca, 
         modelo, 
         ano, 
@@ -179,36 +179,36 @@ routes.post('/newConductor', (req, res) => {
 
     // Consulta SQL para insertar un nuevo usuario
     const queryUsuario = `
-        INSERT INTO usuarios (id, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO usuarios (id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     // Consulta SQL para insertar un nuevo conductor
     const queryConductor = `
-        INSERT INTO conductores (id, genero, nombre, apellido, numero_licencia, fecha_vencimiento)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO conductor (id_conductor, calificacion_conductor, estado_disponibilidad, numero_licencia, fecha_vencimiento, foto_perfil, documento_verificacion)
+        VALUES (?, ?, ?)
     `;
 
     // Consulta SQL para insertar el vehículo
     const queryVehiculo = `
-        INSERT INTO vehiculos (placa, marca, modelo, ano, color, capacidad_pasajeros, id_conductor)
+        INSERT INTO vehiculo (id_placa, id_conductor, marca, modelo, ano, color, capacidad_pasajeros)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     // Ejecutar las consultas en secuencia
-    req.connection.query(queryUsuario, [id, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion], (err, resultUsuario) => {
+    req.connection.query(queryUsuario, [id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion], (err, resultUsuario) => {
         if (err) {
             console.error('Error al insertar el usuario:', err);
             return res.status(500).json({ error: 'Error al crear el usuario' });
         }
 
-        req.connection.query(queryConductor, [id, genero, nombre, apellido, numero_licencia, fecha_vencimiento], (err, resultConductor) => {
+        req.connection.query(queryConductor, [id, calificacion_conductor, estado_disponibilidad, numero_licencia, fecha_vencimiento, foto_perfil, documento_verificacion], (err, resultConductor) => {
             if (err) {
                 console.error('Error al insertar el conductor:', err);
                 return res.status(500).json({ error: 'Error al crear el conductor' });
             }
 
-            req.connection.query(queryVehiculo, [placa, marca, modelo, ano, color, capacidad_pasajeros, id], (err, resultVehiculo) => {
+            req.connection.query(queryVehiculo, [id_placa, id, marca, modelo, ano, color, capacidad_pasajeros], (err, resultVehiculo) => {
                 if (err) {
                     console.error('Error al insertar el vehículo:', err);
                     return res.status(500).json({ error: 'Error al crear el vehículo' });

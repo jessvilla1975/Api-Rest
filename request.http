@@ -30,29 +30,32 @@ Content-Type: application/json
         
 }
 
+### Solicitud para crear un nuevo usuario conductor
 POST https://api-rest-vo9r.onrender.com/api/newConductor
 Content-Type: application/json
 
 {
+        "id": 5,
+        "genero": "Femenino",
+        "nombre": "camila",
+        "apellido": "cabello",
+        "correo": "camila@example.com",
+        "telefono": "9876543210",
+        "direccion": "Avenida Siempre Viva 456",
+        "fecha_nacimiento": "1995-05-15",
+        "contraseña": "123123",
+        "numero_licencia": "123456789",
+        "fecha_vencimiento": "2023-12-31",
+        "id_placa": "ABC123",
+        "marca": "Toyota",
+        "modelo": "Corolla",
+        "ano": "2019",
+        "color": "Rojo",
+        "capacidad_pasajeros": 5
+
         
-    "id": "5",
-    "genero": "Masculino",
-    "nombre": "Naruto",
-    "apellido": "Usumaki",
-    "correo": "naruto@gmail.com",
-    "telefono": "+573137895048",
-    "direccion": "cra 8",
-    "fecha_nacimiento": "2024-10-01",
-    "contraseña": "789789",
-    "numero_licencia": "789789789",
-    "fecha_vencimiento": "2026-12-31",
-    "placa": "123456",
-    "marca": "Honda",
-    "modelo": "CBR",
-    "ano": "2020",
-    "color": "Negro",
-    "capacidad_pasajeros": "2"
 }
+
 
         
 
