@@ -35,32 +35,30 @@ POST https://api-rest-vo9r.onrender.com/api/newConductor
 Content-Type: application/json
 
 {
-        "id": 5,
-        "genero": "Femenino",
-        "nombre": "camila",
-        "apellido": "cabello",
-        "correo": "camila@example.com",
-        "telefono": "9876543210",
-        "direccion": "Avenida Siempre Viva 456",
-        "fecha_nacimiento": "1995-05-15",
-        "contraseña": "123123",
-        "numero_licencia": "123456789",
-        "fecha_vencimiento": "2023-12-31",
-        "id_placa": "ABC123",
-        "marca": "Toyota",
-        "modelo": "Corolla",
-        "ano": "2019",
-        "color": "Rojo",
-        "capacidad_pasajeros": 5
-
-        
+    "id_conductor": 3,
+    "numero_licencia": "ABC123456",
+    "fecha_vencimiento": "2025-12-31"
 }
+
+POST https://api-rest-vo9r.onrender.com/api/newVehiculo
+Content-Type: application/json
+
+{
+    "id_placa": 1,
+    "id_conductor": 3,
+    "marca": "Toyota",
+    "modelo": "Corolla",
+    "ano": "2020",
+    "color": "Rojo",
+    "capacidad_pasajeros": "5"
+}
+
 
 ### Solicitud para obtener todos los conductores
 GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
 
 ### Solicitud para obtener todos los vehiculos
-GET https://api-rest-vo9r.onrender.com/api/vehiculo HTTP/1.1
+GET https://api-rest-vo9r.onrender.com/api/vehiculos HTTP/1.1
 
 
 

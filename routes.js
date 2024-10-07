@@ -121,7 +121,7 @@ routes.get('/conductores', (req, res) => {
     });
 });
 
-// conductores
+// vehiculos
 routes.get('/vehiculos', (req, res) => {
     req.connection.query('SELECT * FROM vehiculo', (err, results) => {
         if (err) {
@@ -161,135 +161,34 @@ routes.post('/login', (req, res) => {
     });
 });
 
+// ruta para agregar conductor------------------------------
 
-
-// Ruta para nuevo conductor
-// Ruta para nuevo conductor
 routes.post('/newConductor', (req, res) => {
-    const { 
-        id, 
-        nombre, 
-        apellido, 
-        correo, 
-        telefono, 
-        direccion, 
-        fecha_nacimiento, 
-        contraseña, 
-        genero, 
-        numero_licencia, 
-        fecha_vencimiento, 
-        id_placa, 
-        marca, 
-        modelo, 
-        ano, 
-        color, 
-        capacidad_pasajeros 
-    } = req.body;
+    const { id_conductor, numero_licencia, fecha_vencimiento } = req.body;
 
-    // Validar que se reciban todos los campos necesarios
-    if (!id || !nombre || !apellido || !correo || !contraseña || !genero || 
-        !numero_licencia || !fecha_vencimiento || !id_placa || !marca || 
-        !modelo || !ano || !color || !capacidad_pasajeros) {
-        return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
+    // Validar que se reciban los campos obligatorios
+    if (!id_conductor || !numero_licencia || !fecha_vencimiento) {
+        return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios: id_conductor, numero_licencia, fecha_vencimiento.' });
     }
 
-    // Generar un código de verificación aleatorio
-    const codigo_verificacion = crypto.randomInt(100000, 999999).toString(); // Código de 6 dígitos
-
-    // Consulta SQL para insertar un nuevo usuario
-    const queryUsuario = `
-        INSERT INTO usuarios (id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
     // Consulta SQL para insertar un nuevo conductor
-    const queryConductor = `
-        INSERT INTO conductor (id_conductor, calificacion_conductor, estado_disponibilidad, numero_licencia, fecha_vencimiento, foto_perfil, documento_verificacion)
-        VALUES (?, ?, ?)
+    const query = `
+        INSERT INTO conductor (id_conductor, calificacion_conductor, estado_disponibilidad, numero_licencia, fecha_vencimiento)
+        VALUES (?, NULL, NULL, ?, ?)
     `;
 
-    // Consulta SQL para insertar el vehículo
-    const queryVehiculo = `
-        INSERT INTO vehiculo (id_placa, id_conductor, marca, modelo, ano, color, capacidad_pasajeros)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    // Ejecutar las consultas en secuencia
-    req.connection.query(queryUsuario, [id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion], (err, resultUsuario) => {
+    // Ejecutar la consulta usando req.connection
+    req.connection.query(query, [id_conductor, numero_licencia, fecha_vencimiento], (err, result) => {
         if (err) {
-            console.error('Error al insertar el usuario:', err);
-            return res.status(500).json({ error: 'Error al crear el usuario' });
+            console.error('Error al insertar el conductor:', err);
+            return res.status(500).json({ error: 'Error al crear el conductor' });
         }
 
-        req.connection.query(queryConductor, [id, calificacion_conductor, estado_disponibilidad, numero_licencia, fecha_vencimiento, foto_perfil, documento_verificacion], (err, resultConductor) => {
-            if (err) {
-                console.error('Error al insertar el conductor:', err);
-                return res.status(500).json({ error: 'Error al crear el conductor' });
-            }
-
-            req.connection.query(queryVehiculo, [id_placa, id, marca, modelo, ano, color, capacidad_pasajeros], (err, resultVehiculo) => {
-                if (err) {
-                    console.error('Error al insertar el vehículo:', err);
-                    return res.status(500).json({ error: 'Error al crear el vehículo' });
-                }
-
-                // Enviar correo de verificación
-                const mailOptions = {
-                    from: "campusrideapps@gmail.com",
-                    to: correo,
-                    subject: "Código de Verificación de Campus Ride",
-                    html: `
-                      <html>
-                        <head>
-                          <style>
-                            body {
-                              font-family: Arial, sans-serif;
-                              background-color: #f4f4f4;
-                              padding: 20px;
-                            }
-                            .container {
-                              background-color: #fff;
-                              padding: 20px;
-                              border-radius: 8px;
-                              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                            }
-                            h1 {
-                              color: #333;
-                            }
-                            .code {
-                              font-size: 24px;
-                              font-weight: bold;
-                              color: #007BFF;
-                            }
-                          </style>
-                        </head>
-                        <body>
-                          <div class="container">
-                            <h1>Código de Verificación de Campus Ride</h1>
-                            <p>Hola, ${nombre}</p>
-                            <p>Tu código de verificación es:</p>
-                            <p class="code">${codigo_verificacion}</p>
-                            <p>¡Gracias por unirte a nosotros!</p>
-                            <p>Saludos,<br/>El equipo de Campus Ride</p>
-                          </div>
-                        </body>
-                      </html>
-                    `,
-                };
-
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        console.error('Error al enviar el correo:', error);
-                        return res.status(500).json({ error: 'Error al enviar el correo de verificación' });
-                    }
-
-                    // Devolver una respuesta de éxito
-                    res.status(201).json({ message: 'Conductor y vehículo creados exitosamente. Se ha enviado un código de verificación a tu correo.', userId: id });
-                });
-            });
-        });
+        // Devolver una respuesta de éxito
+        res.status(201).json({ message: 'Conductor creado exitosamente.', conductorId: id_conductor });
     });
 });
+
 
 
 
