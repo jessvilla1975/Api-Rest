@@ -1,6 +1,8 @@
 ### Solicitud para obtener la API
 GET https://api-rest-vo9r.onrender.com/api HTTP/1.1
 
+### Solicitud para obtener todos los usuarios
+GET https://api-rest-vo9r.onrender.com/api/usuarios HTTP/1.1
 
 ### Solicitud para iniciar sesión
 POST https://api-rest-vo9r.onrender.com/api/login
@@ -16,11 +18,11 @@ POST https://api-rest-vo9r.onrender.com/api/newUser
 Content-Type: application/json
 
 {
-        "id": 100,
+        "id": 3,
         "genero": "Femenino",
         "nombre": "jess",
         "apellido": "villa",
-        "correo": "watewo5105@chainds.com",
+        "correo": "kicerey838@hraifi.com",
         "telefono": "9876543210",
         "direccion": "Avenida Siempre Viva 456",
         "fecha_nacimiento": "1995-05-15",
@@ -59,13 +61,15 @@ Content-Type: application/json
     "correo": "watewo5105@chainds.com"
 }
 
-POST https://api-rest-vo9r.onrender.com/api/verifyCode HTTP/1.1
+### Solicitud para verificar código de verificación
+POST https://api-rest-vo9r.onrender.com/api/verifyCode
 Content-Type: application/json
+    
+    {
+        "correo": "watewo5105@chainds.com",
+        "codigo": "226270"
+    }
 
-{
-    "correo": "kicerey838@hraifi.com",
-    "codigo_verificacion": "123456"
-}
 
 
 ### Solicitud para obtener todos los conductores
@@ -75,8 +79,6 @@ GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
 GET https://api-rest-vo9r.onrender.com/api/vehiculos HTTP/1.1
 
 
-### Solicitud para obtener todos los usuarios
-GET https://api-rest-vo9r.onrender.com/api/usuarios HTTP/1.1
 
 
         
