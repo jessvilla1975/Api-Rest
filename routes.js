@@ -311,34 +311,6 @@ routes.post('/sendVerificationCode', (req, res) => {
     });
 });
 
-routes.post('/verifyCode', (req, res) => {
-    const { correo, codigo_verificacion } = req.body;
-
-    // Validar que se reciban ambos parámetros
-    if (!correo || !codigo_verificacion) {
-        return res.status(400).json({ error: 'Correo y código de verificación son requeridos.' });
-    }
-
-    // Consulta SQL para verificar si el código coincide
-    const query = `
-        SELECT * FROM usuarios WHERE correo = ? AND codigo_verificacion = ?
-    `;
-
-    req.connection.query(query, [correo, codigo_verificacion], (err, result) => {
-        if (err) {
-            console.error('Error al verificar el código:', err);
-            return res.status(500).json({ error: 'Error al verificar el código' });
-        }
-
-        if (result.length > 0) {
-            // El código de verificación es correcto
-            res.status(200).json({ success: true, message: 'Código de verificación correcto.' });
-        } else {
-            // El código de verificación es incorrecto
-            res.status(400).json({ success: false, message: 'Código de verificación incorrecto.' });
-        }
-    });
-});
 
 
 
