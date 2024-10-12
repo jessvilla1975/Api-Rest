@@ -71,7 +71,7 @@ Content-Type: application/json
     }
 
 ### restablecer contraseña
-POST https://api-rest-vo9r.onrender.com/api/nuevaContraseña
+POST https://api-rest-vo9r.onrender.com/api/newPassword
 Content-Type: application/json
 
 {

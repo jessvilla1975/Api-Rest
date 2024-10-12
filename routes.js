@@ -341,7 +341,7 @@ routes.post('/verifyCode', (req, res) => {
 });
 
 // Ruta para restablecer la contraseña sin encriptación
-routes.post('/nuevaContraseña', (req, res) => {
+routes.post('/newPassword', (req, res) => {
     const { correo, contraseña } = req.body;
 
     // Validar que se reciban ambos parámetros
