@@ -67,9 +67,17 @@ Content-Type: application/json
     
     {
         "correo": "watewo5105@chainds.com",
-        "codigo": "226270"
+        "codigo_verificacion": "477468"
     }
 
+### restablecer contraseña
+POST https://api-rest-vo9r.onrender.com/api/nuevaContraseña
+Content-Type: application/json
+
+{
+    "correo": "watewo5105@chainds.com",
+    "nuevaContrasena": "nuevaContraseña123"
+}
 
 
 ### Solicitud para obtener todos los conductores

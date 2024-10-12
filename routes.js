@@ -340,6 +340,39 @@ routes.post('/verifyCode', (req, res) => {
     });
 });
 
+// Ruta para restablecer la contraseña
+routes.post('/nuevaContraseña', (req, res) => {
+    const { correo, nuevaContraseña } = req.body;
+
+    // Validar que se reciban ambos parámetros
+    if (!correo || !nuevaContraseña) {
+        return res.status(400).json({ error: 'Correo y nueva contraseña son requeridos.' });
+    }
+
+    // Hashear la nueva contraseña (asegúrate de tener bcrypt instalado)
+    const bcrypt = require('bcrypt');
+    const saltRounds = 10; // Puedes ajustar los rounds según tus necesidades
+
+    bcrypt.hash(nuevaContraseña, saltRounds, (err, hash) => {
+        if (err) {
+            console.error('Error al hashear la contraseña:', err);
+            return res.status(500).json({ error: 'Error al procesar la contraseña' });
+        }
+
+        // Consulta SQL para actualizar la contraseña en la base de datos
+        const query = 'UPDATE usuarios SET contraseña = ? WHERE correo = ?';
+
+        req.connection.query(query, [hash, correo], (updateErr) => {
+            if (updateErr) {
+                console.error('Error al actualizar la contraseña:', updateErr);
+                return res.status(500).json({ error: 'Error al actualizar la contraseña' });
+            }
+
+            // Devolver una respuesta de éxito
+            res.status(200).json({ message: 'La contraseña ha sido actualizada exitosamente.' });
+        });
+    });
+});
 
 
 
