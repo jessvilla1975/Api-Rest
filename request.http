@@ -1,8 +1,6 @@
 ### Solicitud para obtener la API
 GET https://api-rest-vo9r.onrender.com/api HTTP/1.1
 
-### Solicitud para obtener todos los usuarios
-GET https://api-rest-vo9r.onrender.com/api/usuarios HTTP/1.1
 
 ### Solicitud para iniciar sesión
 POST https://api-rest-vo9r.onrender.com/api/login
@@ -61,6 +59,15 @@ Content-Type: application/json
     "correo": "kicerey838@hraifi.com"
 }
 
+POST https://api-rest-vo9r.onrender.com/api/verifyCode
+Content-Type: application/json
+
+{
+    "correo": "kicerey838@hraifi.com",
+    "codigo_verificacion": "123456"
+}
+
+
 ### Solicitud para obtener todos los conductores
 GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
 
@@ -68,6 +75,8 @@ GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
 GET https://api-rest-vo9r.onrender.com/api/vehiculos HTTP/1.1
 
 
+### Solicitud para obtener todos los usuarios
+GET https://api-rest-vo9r.onrender.com/api/usuarios HTTP/1.1
 
 
         
