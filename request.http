@@ -76,7 +76,7 @@ Content-Type: application/json
 
 {
     "correo": "watewo5105@chainds.com",
-    "nuevaContrasena": "nuevaContraseña123"
+    "contraseña": "nuevaContraseña123"
 }
 
 
