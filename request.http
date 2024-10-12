@@ -58,7 +58,7 @@ POST https://api-rest-vo9r.onrender.com/api/sendVerificationCode
 Content-Type: application/json
 
 {
-    "correo": "juan.perez@example.com"
+    "correo": "kicerey838@hraifi.com"
 }
 
 ### Solicitud para obtener todos los conductores
