@@ -218,6 +218,92 @@ routes.post('/newVehiculo', (req, res) => {
 });
 
 
+// Ruta para enviar código de verificación------------------------------
+routes.post('/sendVerificationCode', (req, res) => {
+    const { correo } = req.body;
+
+    // Validar que se reciba el correo
+    if (!correo) {
+        return res.status(400).json({ error: 'Por favor, proporcione un correo electrónico.' });
+    }
+
+    // Generar un código de verificación aleatorio
+    const codigo_verificacion = crypto.randomInt(100000, 999999).toString(); // Código de 6 dígitos
+
+    // Consulta SQL para verificar si el correo existe
+    const query = `
+        SELECT * FROM usuarios WHERE correo = ?
+    `;
+
+    // Ejecutar la consulta usando req.connection
+    req.connection.query(query, [correo], (err, result) => {
+        if (err) {
+            console.error('Error al consultar el correo:', err);
+            return res.status(500).json({ error: 'Error al consultar el correo' });
+        }
+
+        if (result.length > 0) {
+            // Enviar correo de verificación
+            const mailOptions = {
+                from: "campusrideapps@gmail.com",
+                to: correo,
+                subject: "Restablecimiento de contraseña de Campus Ride",
+                html: `
+                  <html>
+                    <head>
+                      <style>
+                        body {
+                          font-family: Arial, sans-serif;
+                          background-color: #f4f4f4;
+                          padding: 20px;
+                        }
+                        .container {
+                          background-color: #fff;
+                          padding: 20px;
+                          border-radius: 8px;
+                          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                        }
+                        h1 {
+                          color: #333;
+                        }
+                        .code {
+                          font-size: 24px;
+                          font-weight: bold;
+                          color: #007BFF;
+                        }
+                      </style>
+                    </head>
+                    <body>
+                      <div class="container">
+                        <h1>Código de Verificación de Campus Ride</h1>
+                        <p>Hola, ${result[0].nombre}</p>
+                        <p>Tu código de verificación es:</p>
+                        <p class="code">${codigo_verificacion}</p>
+                        <p>¡Escribe el codigo para restablecer tu contraseña!</p>
+                        <p>Saludos,<br/>El equipo de Campus Ride</p>
+                      </div>
+                    </body>
+                  </html>
+                `,
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Error al enviar el correo:', error);
+                    return res.status(500).json({ error: 'Error al enviar el correo de verificación' });
+                }
+
+                // Devolver una respuesta de éxito
+                res.status(200).json({ message: 'Se ha enviado un código de verificación a tu correo.' });
+            });
+        } else {
+            // El correo no existe
+            res.status(404).json({ error: 'El correo electrónico no está registrado.' });
+        }
+    });
+});
+
+
 
 
 

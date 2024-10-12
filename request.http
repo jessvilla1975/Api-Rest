@@ -22,7 +22,7 @@ Content-Type: application/json
         "genero": "Femenino",
         "nombre": "jess",
         "apellido": "villa",
-        "correo": "jess@example.com",
+        "correo": "kicerey838@hraifi.com",
         "telefono": "9876543210",
         "direccion": "Avenida Siempre Viva 456",
         "fecha_nacimiento": "1995-05-15",
@@ -45,7 +45,7 @@ POST https://api-rest-vo9r.onrender.com/api/newVehiculo
 Content-Type: application/json
 
 {
-    "id_placa": 1,
+    "id_placa": 3,
     "id_conductor": 3,
     "marca": "Toyota",
     "modelo": "Corolla",
@@ -53,7 +53,13 @@ Content-Type: application/json
     "color": "Rojo",
     "capacidad_pasajeros": "5"
 }
+### Solicitud restaurar contraseña
+POST https://api-rest-vo9r.onrender.com/api/sendVerificationCode
+Content-Type: application/json
 
+{
+    "correo": "juan.perez@example.com"
+}
 
 ### Solicitud para obtener todos los conductores
 GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
