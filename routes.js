@@ -2,6 +2,8 @@ const express = require('express');
 const routes = express.Router();
 const nodemailer = require("nodemailer");
 const crypto = require('crypto');
+const fs = require('fs').promises;
+const path = require('path');
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -363,7 +365,165 @@ routes.post('/newPassword', (req, res) => {
     });
 });
 
+// Ruta para actualizar un usuario
+routes.put('/updateUser/:id', (req, res) => {
+    const userId = req.params.id;
+    const { genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña } = req.body;
 
+    // Validar que se reciban todos los campos necesarios
+    if (!genero || !nombre || !apellido || !correo || !telefono || !direccion || !fecha_nacimiento || !contraseña) {
+        return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
+    }
+
+    // Consulta SQL para actualizar el usuario
+    const query = `
+        UPDATE usuarios SET 
+            genero = ?, 
+            nombre = ?, 
+            apellido = ?, 
+            correo = ?, 
+            telefono = ?, 
+            direccion = ?, 
+            fecha_nacimiento = ?, 
+            contraseña = ? 
+        WHERE id = ?
+    `;
+
+    // Ejecutar la consulta usando req.connection
+    req.connection.query(query, [genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, userId], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar el usuario:', err);
+            return res.status(500).json({ error: 'Error al actualizar el usuario' });
+        }
+
+        // Verificar si se actualizó algún registro
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        // Devolver una respuesta de éxito
+        res.status(200).json({ message: 'Usuario actualizado exitosamente' });
+    });
+});
+
+// Ruta para actualizar un conductor
+routes.put('/updateConductor/:id', (req, res) => {
+    const id_conductor = req.params.id; // Obtener el ID del conductor desde la URL
+    const { numero_licencia, fecha_vencimiento } = req.body; // Obtener los datos del cuerpo de la solicitud
+
+    // Validar que se reciban todos los campos necesarios
+    if (!numero_licencia || !fecha_vencimiento) {
+        return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios: numero_licencia, fecha_vencimiento.' });
+    }
+
+    // Consulta SQL para actualizar el conductor
+    const query = `
+        UPDATE conductor
+        SET numero_licencia = ?, fecha_vencimiento = ?
+        WHERE id_conductor = ?
+    `;
+
+    // Ejecutar la consulta usando req.connection
+    req.connection.query(query, [numero_licencia, fecha_vencimiento, id_conductor], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar el conductor:', err);
+            return res.status(500).json({ error: 'Error al actualizar el conductor' });
+        }
+
+        // Verificar si se actualizó algún registro
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Conductor no encontrado' });
+        }
+
+        // Devolver una respuesta de éxito
+        res.status(200).json({ message: 'Conductor actualizado exitosamente.' });
+    });
+});
+
+// Función para leer y preparar el template
+async function getEmailTemplate(templateData) {
+    try {
+        let template = await fs.readFile(path.join(__dirname, 'emailTemplates/helpDesk.html'), 'utf8');
+        
+        // Reemplazar las variables en el template
+        Object.keys(templateData).forEach(key => {
+            const regex = new RegExp(`{{${key}}}`, 'g');
+            template = template.replace(regex, templateData[key]);
+        });
+        
+        return template;
+    } catch (error) {
+        console.error('Error al leer el template:', error);
+        throw error;
+    }
+}
+
+// Ruta POST para la mesa de ayuda
+routes.post('/helpDesk', async (req, res) => {
+    const { nombre, correo, telefono, comentario } = req.body;
+
+    // Validar campos requeridos
+    if (!nombre || !correo || !comentario) {
+        return res.status(400).json({ 
+            error: 'Por favor, complete los campos obligatorios (nombre, correo y comentario).' 
+        });
+    }
+
+    // Insertar en la base de datos
+    const query = `
+        INSERT INTO mesa_ayuda (nombre, correo, telefono, comentario)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    req.connection.query(query, [nombre, correo, telefono, comentario], async (err, result) => {
+        if (err) {
+            console.error('Error al crear la solicitud:', err);
+            return res.status(500).json({ error: 'Error al crear la solicitud' });
+        }
+
+        const id_solicitud = result.insertId;
+        const fecha = new Date().toLocaleString();
+
+        try {
+            // Preparar datos para el template
+            const templateData = {
+                nombre,
+                id_solicitud,
+                estado: 'Pendiente',
+                fecha,
+                comentario
+            };
+
+            // Obtener el HTML del correo
+            const htmlContent = await getEmailTemplate(templateData);
+
+            // Configurar el correo
+            const mailOptions = {
+                from: "campusrideapps@gmail.com",
+                to: correo,
+                subject: `Ticket #${id_solicitud} - Mesa de Ayuda CampusRide`,
+                html: htmlContent
+            };
+
+            // Enviar el correo
+            await transporter.sendMail(mailOptions);
+
+            // Respuesta exitosa
+            res.status(201).json({ 
+                message: 'Solicitud creada exitosamente', 
+                id_solicitud,
+                estado: 'Pendiente'
+            });
+
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({ 
+                error: 'Error al procesar la solicitud',
+                details: error.message 
+            });
+        }
+    });
+});
 
 
 

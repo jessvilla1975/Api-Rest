@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS vehiculo;
 DROP TABLE IF EXISTS pasajero;
 DROP TABLE IF EXISTS conductor;
 DROP TABLE IF EXISTS usuarios;
-
+DROP TABLE IF EXISTS mesa_ayuda;
 
 
 CREATE TABLE usuarios (
@@ -95,6 +95,17 @@ create table historial_viajes (
   FOREIGN KEY (id_viaje) REFERENCES viaje (id_viaje)
 );
 
+CREATE TABLE mesa_ayuda (
+    id_solicitud INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    correo VARCHAR(100) NOT NULL,
+    telefono VARCHAR(15),
+    comentario TEXT NOT NULL,
+    estado VARCHAR(20) DEFAULT 'Pendiente',
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Insertar en la tabla usuarios
 INSERT INTO usuarios (id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion)
 VALUES
@@ -142,3 +153,8 @@ INSERT INTO historial_viajes (id_pasajero, id_viaje)
 VALUES
 (1, 1),
 (2, 2);
+
+INSERT INTO mesa_ayuda (nombre, correo, telefono, comentario)
+VALUES
+    ('Juan Pérez', 'juan.perez@example.com', '1234567890', 'Necesito ayuda con mi cuenta'),
+    ('Ana López', 'ana.lopez@example.com', '0987654321', 'Problemas con la aplicación');

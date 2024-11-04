@@ -1,8 +1,15 @@
+//local : http://localhost:9001/api/usuarios HTTP/1.1
+
 ### Solicitud para obtener la API
 GET https://api-rest-vo9r.onrender.com/api HTTP/1.1
 
 ### Solicitud para obtener todos los usuarios
 GET https://api-rest-vo9r.onrender.com/api/usuarios HTTP/1.1
+
+
+### Solicitud para obtener un usuario local
+GET http://localhost:9001/api/usuarios HTTP/1.1
+//*********************  POST  *********************//
 
 ### Solicitud para iniciar sesión
 POST https://api-rest-vo9r.onrender.com/api/login
@@ -80,6 +87,44 @@ Content-Type: application/json
 }
 
 
+//*********************  PUT *********************//
+### Solicitud para actualizar un usuario
+PUT http://localhost:9001/api/updateUser/1
+Content-Type: application/json
+
+{
+    "genero": "Masculino",
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "correo": "juan.perez@example.com",
+    "telefono": "1234567890",
+    "direccion": "Calle Falsa 123",
+    "fecha_nacimiento": "1990-01-01",
+    "contraseña": "123456"
+}
+
+### Solicitud para actualizar un conductor
+PUT http://localhost:9001/api/updateConductor/1
+Content-Type: application/json
+
+{
+    "numero_licencia": "XYZ987654",
+    "fecha_vencimiento": "2028-05-30"
+}
+
+
+### Solicitud mesa de ayuda 
+#POST https://api-rest-vo9r.onrender.com/api/helpDesk
+POST http://localhost:9001/api/helpDesk
+Content-Type: application/json
+
+{
+    "nombre": "Jess Villa",
+    "correo": "jess.villa@example.com",
+    "telefono": "1234567890",
+    "comentario": "Necesito ayuda con el registro en la aplicación"
+}
+//*********************  GET *********************//
 ### Solicitud para obtener todos los conductores
 GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
 

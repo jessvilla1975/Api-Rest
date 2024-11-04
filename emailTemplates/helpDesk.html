@@ -1,0 +1,68 @@
+<!-- emailTemplates/helpDesk.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+      }
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+      }
+      .ticket-info {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .ticket-id {
+        font-size: 24px;
+        font-weight: bold;
+        color: #007bff;
+      }
+      .footer {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        font-size: 14px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Solicitud de Mesa de Ayuda</h1>
+      <p>Hola, {{nombre}}</p>
+      <p>Hemos recibido tu solicitud de ayuda. A continuación, encontrarás los detalles de tu ticket:</p>
+      
+      <div class="ticket-info">
+        <p>ID de Solicitud: <span class="ticket-id">{{id_solicitud}}</span></p>
+        <p>Estado: <strong>{{estado}}</strong></p>
+        <p>Fecha: <strong>{{fecha}}</strong></p>
+      </div>
+
+      <p>Tu mensaje:</p>
+      <blockquote style="font-style: italic; padding: 10px; background: #f8f9fa;">
+        {{comentario}}
+      </blockquote>
+
+      <p>Nos pondremos en contacto contigo lo antes posible.</p>
+      
+      <div class="footer">
+        <p>Saludos,<br/>El equipo de CampusRide</p>
+      </div>
+    </div>
+  </body>
+</html>
