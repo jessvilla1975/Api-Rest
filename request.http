@@ -12,7 +12,7 @@ GET http://localhost:9001/api/usuarios HTTP/1.1
 //*********************  POST  *********************//
 
 ### Solicitud para iniciar sesión
-POST https://api-rest-vo9r.onrender.com/api/login
+POST http://localhost:9001/api/login
 Content-Type: application/json
 
 {
@@ -21,15 +21,15 @@ Content-Type: application/json
 }
 
 ### Solicitud para crear un nuevo usuario
-POST https://api-rest-vo9r.onrender.com/api/newUser
+POST http://localhost:9001/api/newUser
 Content-Type: application/json
 
 {
-        "id": 3,
+        "id": 79,
         "genero": "Femenino",
         "nombre": "jess",
         "apellido": "villa",
-        "correo": "kicerey838@hraifi.com",
+        "correo": "jexikvilla@gmail.com",
         "telefono": "9876543210",
         "direccion": "Avenida Siempre Viva 456",
         "fecha_nacimiento": "1995-05-15",
@@ -132,6 +132,8 @@ GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
 GET https://api-rest-vo9r.onrender.com/api/vehiculos HTTP/1.1
 
 
+### Solicitud para obtener un usuario
+GET http://localhost:9001/api/usuariosid/3 HTTP/1.1
 
 
         

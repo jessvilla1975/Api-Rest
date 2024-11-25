@@ -19,85 +19,143 @@ const transporter = nodemailer.createTransport({
 
 // Ruta para nuevo usuario--------------------------------
 routes.post('/newUser', (req, res) => {
-    const { id, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, genero } = req.body;
+    const { 
+        id, 
+        nombre, 
+        apellido, 
+        correo, 
+        telefono, 
+        direccion, 
+        fecha_nacimiento, 
+        contraseña, 
+        genero,
+        rol
+    } = req.body;
 
     // Validar que se reciban todos los campos necesarios
     if (!id || !nombre || !apellido || !correo || !contraseña || !genero) {
         return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
     }
 
-    // Generar un código de verificación aleatorio
-    const codigo_verificacion = crypto.randomInt(100000, 999999).toString(); // Código de 6 dígitos
-
-    // Consulta SQL para insertar un nuevo usuario
-    const query = `
-        INSERT INTO usuarios (id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    // Ejecutar la consulta usando req.connection
-    req.connection.query(query, [id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, codigo_verificacion], (err, result) => {
-        if (err) {
-            console.error('Error al insertar el usuario:', err);
-            return res.status(500).json({ error: 'Error al crear el usuario' });
+    // Primero, verificar si el correo ya existe
+    const checkEmailQuery = 'SELECT correo FROM usuarios WHERE correo = ?';
+    
+    req.connection.query(checkEmailQuery, [correo], (checkErr, checkResult) => {
+        if (checkErr) {
+            console.error('Error al verificar el correo:', checkErr);
+            return res.status(500).json({ error: 'Error al verificar el correo' });
         }
 
-        // Enviar correo de verificación
-        const mailOptions = {
-            from: "campusrideapps@gmail.com",
-            to: correo,
-            subject: "Código de Verificación de Campus Ride",
-            html: `
-              <html>
-                <head>
-                  <style>
-                    body {
-                      font-family: Arial, sans-serif;
-                      background-color: #f4f4f4;
-                      padding: 20px;
-                    }
-                    .container {
-                      background-color: #fff;
-                      padding: 20px;
-                      border-radius: 8px;
-                      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                    }
-                    h1 {
-                      color: #333;
-                    }
-                    .code {
-                      font-size: 24px;
-                      font-weight: bold;
-                      color: #007BFF;
-                    }
-                  </style>
-                </head>
-                <body>
-                  <div class="container">
-                    <h1>Código de Verificación de Campus Ride</h1>
-                    <p>Hola, ${nombre}</p>
-                    <p>Tu código de verificación es:</p>
-                    <p class="code">${codigo_verificacion}</p>
-                    <p>¡Gracias por unirte a nosotros!</p>
-                    <p>Saludos,<br/>El equipo de Campus Ride</p>
-                  </div>
-                </body>
-              </html>
-            `,
-        };
+        // Si se encuentra un usuario con ese correo
+        if (checkResult.length > 0) {
+            return res.status(400).json({ 
+                error: 'Este correo electrónico ya está registrado',
+                code: 'EMAIL_EXISTS'
+            });
+        }
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Error al enviar el correo:', error);
-                return res.status(500).json({ error: 'Error al enviar el correo de verificación' });
+        // Si el correo no existe, continuar con el registro
+        const codigo_verificacion = crypto.randomInt(100000, 999999).toString();
+        const userRole = rol || 'pasajero';
+
+        const insertQuery = `
+            INSERT INTO usuarios (
+                id, 
+                genero, 
+                nombre, 
+                apellido, 
+                correo, 
+                telefono, 
+                direccion, 
+                fecha_nacimiento, 
+                contraseña, 
+                codigo_verificacion,
+                rol
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        req.connection.query(
+            insertQuery, 
+            [
+                id, 
+                genero, 
+                nombre, 
+                apellido, 
+                correo, 
+                telefono, 
+                direccion, 
+                fecha_nacimiento, 
+                contraseña, 
+                codigo_verificacion,
+                userRole
+            ], 
+            (insertErr, result) => {
+                if (insertErr) {
+                    console.error('Error al insertar el usuario:', insertErr);
+                    return res.status(500).json({ error: 'Error al crear el usuario' });
+                }
+
+                // Configuración del correo
+                const mailOptions = {
+                    from: "campusrideapps@gmail.com",
+                    to: correo,
+                    subject: "Código de Verificación de Campus Ride",
+                    html: `
+                        <html>
+                            <head>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        background-color: #f4f4f4;
+                                        padding: 20px;
+                                    }
+                                    .container {
+                                        background-color: #fff;
+                                        padding: 20px;
+                                        border-radius: 8px;
+                                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                                    }
+                                    h1 {
+                                        color: #333;
+                                    }
+                                    .code {
+                                        font-size: 24px;
+                                        font-weight: bold;
+                                        color: #007BFF;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="container">
+                                    <h1>Código de Verificación de Campus Ride</h1>
+                                    <p>Hola, ${nombre}</p>
+                                    <p>Tu código de verificación es:</p>
+                                    <p class="code">${codigo_verificacion}</p>
+                                    <p>¡Gracias por unirte a nosotros!</p>
+                                    <p>Saludos,<br/>El equipo de Campus Ride</p>
+                                </div>
+                            </body>
+                        </html>
+                    `,
+                };
+
+                transporter.sendMail(mailOptions, (mailErr, info) => {
+                    if (mailErr) {
+                        console.error('Error al enviar el correo:', mailErr);
+                        return res.status(500).json({ error: 'Error al enviar el correo de verificación' });
+                    }
+
+                    res.status(201).json({ 
+                        message: 'Usuario creado exitosamente. Se ha enviado un código de verificación a tu correo.', 
+                        userId: id,
+                        rol: userRole
+                    });
+                });
             }
-
-            // Devolver una respuesta de éxito
-            res.status(201).json({ message: 'Usuario creado exitosamente. Se ha enviado un código de verificación a tu correo.', userId: id });
-        });
+        );
     });
 });
-
 // Ruta para la API --------------------------------
 routes.get('/', (req, res) => {
     res.send('Bienvenido a mi API');
@@ -136,17 +194,14 @@ routes.get('/vehiculos', (req, res) => {
 routes.post('/login', (req, res) => {
     const { correo, contraseña } = req.body;
 
-    // Validar que se reciban todos los campos necesarios
     if (!correo || !contraseña) {
         return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
     }
 
-    // Consulta SQL para verificar el usuario
     const query = `
-        SELECT * FROM usuarios WHERE correo = ? AND contraseña = ?
+        SELECT id, rol FROM usuarios WHERE correo = ? AND contraseña = ?
     `;
 
-    // Ejecutar la consulta usando req.connection
     req.connection.query(query, [correo, contraseña], (err, result) => {
         if (err) {
             console.error('Error al validar el usuario:', err);
@@ -154,14 +209,14 @@ routes.post('/login', (req, res) => {
         }
 
         if (result.length > 0) {
-            // El usuario existe
-            res.status(200).json({ message: 'Usuario validado', user: result[0] });
+            const { id, rol } = result[0];
+            return res.status(200).json({ message: 'Usuario validado', id, rol });
         } else {
-            // El usuario no existe
-            res.status(401).json({ error: 'Correo o contraseña incorrectos' });
+            return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
         }
     });
 });
+
 
 // ruta para agregar conductor------------------------------
 
@@ -368,43 +423,74 @@ routes.post('/newPassword', (req, res) => {
 // Ruta para actualizar un usuario
 routes.put('/updateUser/:id', (req, res) => {
     const userId = req.params.id;
-    const { genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña } = req.body;
+    const {
+        nombre,
+        apellido,
+        genero,
+        correo,
+        telefono,
+        direccion,
+        fechaNacimiento,
+        contraseña
+    } = req.body;
 
-    // Validar que se reciban todos los campos necesarios
-    if (!genero || !nombre || !apellido || !correo || !telefono || !direccion || !fecha_nacimiento || !contraseña) {
+    // Verificar que los campos requeridos estén presentes
+    if (!nombre || !apellido || !genero || !correo) {
         return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
     }
 
-    // Consulta SQL para actualizar el usuario
-    const query = `
-        UPDATE usuarios SET 
-            genero = ?, 
+    const updateQuery = `
+        UPDATE usuarios
+        SET 
             nombre = ?, 
             apellido = ?, 
+            genero = ?, 
             correo = ?, 
             telefono = ?, 
             direccion = ?, 
             fecha_nacimiento = ?, 
-            contraseña = ? 
+            contraseña = ?
         WHERE id = ?
     `;
 
+    req.connection.query(
+        updateQuery,
+        [nombre, apellido, genero, correo, telefono, direccion, fechaNacimiento, contraseña, userId],
+        (err, result) => {
+            if (err) {
+                console.error('Error al actualizar el usuario:', err);
+                return res.status(500).json({ error: 'Error al actualizar el usuario' });
+            }
+
+            res.status(200).json({ message: 'Usuario actualizado correctamente.' });
+        }
+    );
+});
+
+// Ruta para obtener los datos de un pasajero por su ID
+routes.get('/getPassengerById/:id', (req, res) => {
+    const passengerId = req.params.id;
+
+    // Consulta SQL para obtener los datos del pasajero
+    const query = 'SELECT * FROM pasajeros WHERE id = ?';
+
     // Ejecutar la consulta usando req.connection
-    req.connection.query(query, [genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, userId], (err, result) => {
+    req.connection.query(query, [passengerId], (err, result) => {
         if (err) {
-            console.error('Error al actualizar el usuario:', err);
-            return res.status(500).json({ error: 'Error al actualizar el usuario' });
+            console.error('Error al obtener el pasajero:', err);
+            return res.status(500).json({ error: 'Error al obtener los datos del pasajero' });
         }
 
-        // Verificar si se actualizó algún registro
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Usuario no encontrado' });
+        // Verificar si se encontró el pasajero
+        if (result.length === 0) {
+            return res.status(404).json({ error: 'Pasajero no encontrado' });
         }
 
-        // Devolver una respuesta de éxito
-        res.status(200).json({ message: 'Usuario actualizado exitosamente' });
+        // Devolver los datos del pasajero
+        res.status(200).json(result[0]);  // Devuelve el primer registro (suponiendo que solo hay uno con ese ID)
     });
 });
+
 
 // Ruta para actualizar un conductor
 routes.put('/updateConductor/:id', (req, res) => {
@@ -525,6 +611,100 @@ routes.post('/helpDesk', async (req, res) => {
     });
 });
 
+
+// Ruta para obtener usuarios por ID (Para el edit)
+routes.get('/usuariosid/:id', async (req, res) => {
+    const userId = req.params.id;
+    const connection = req.connection;
+
+    try {
+        // Query principal que obtiene datos de usuario, conductor y vehículo
+        const query = `
+            SELECT 
+                u.id,
+                u.genero,
+                u.nombre,
+                u.apellido,
+                u.correo,
+                u.telefono,
+                u.direccion,
+                u.fecha_nacimiento as fechaNacimiento,
+                u.contraseña,
+                c.numero_licencia,
+                c.fecha_vencimiento,
+                v.id_placa,
+                v.marca,
+                v.modelo,
+                v.ano,
+                v.color,
+                v.capacidad_pasajeros,
+                CASE 
+                    WHEN c.id_conductor IS NOT NULL THEN 'conductor'
+                    WHEN p.id_pasajero IS NOT NULL THEN 'pasajero'
+                    ELSE 'usuario'
+                END as tipo_usuario
+            FROM usuarios u
+            LEFT JOIN conductor c ON u.id = c.id_conductor
+            LEFT JOIN pasajero p ON u.id = p.id_pasajero
+            LEFT JOIN vehiculo v ON c.id_conductor = v.id_conductor
+            WHERE u.id = ?
+        `;
+
+        const [results] = await connection.promise().query(query, [userId]);
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        const user = results[0];
+        let response = {
+            success: true,
+            data: {
+                tipo_usuario: user.tipo_usuario,
+                usuario: {
+                    id: user.id,
+                    genero: user.genero,
+                    nombre: user.nombre,
+                    apellido: user.apellido,
+                    correo: user.correo,
+                    telefono: user.telefono,
+                    direccion: user.direccion,
+                    fechaNacimiento: user.fechaNacimiento,
+                    contraseña: user.contraseña
+                }
+            }
+        };
+
+        // Si es conductor, agregamos la información adicional
+        if (user.tipo_usuario === 'conductor') {
+            response.data.informacion_conductor = {
+                numero_licencia: user.numero_licencia,
+                fecha_vencimiento: user.fecha_vencimiento,
+                vehiculo: {
+                    id_placa: user.id_placa,
+                    marca: user.marca,
+                    modelo: user.modelo,
+                    ano: user.ano,
+                    color: user.color,
+                    capacidad_pasajeros: user.capacidad_pasajeros
+                }
+            };
+        }
+
+        res.json(response);
+
+    } catch (error) {
+        console.error('Error al obtener usuario:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
 
 
 module.exports = routes;
