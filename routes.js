@@ -55,7 +55,7 @@ routes.post('/newUser', (req, res) => {
         }
 
         // Si el correo no existe, continuar con el registro
-        const codigo_verificacion = crypto.randomInt(100000, 999999).toString();
+        const codigo_verificacion = crypto.randomInt(1000, 10000).toString();
         const userRole = rol || 'pasajero';
 
         const insertQuery = `
@@ -156,6 +156,7 @@ routes.post('/newUser', (req, res) => {
         );
     });
 });
+
 // Ruta para la API --------------------------------
 routes.get('/', (req, res) => {
     res.send('Bienvenido a mi API');
@@ -285,7 +286,7 @@ routes.post('/sendVerificationCode', (req, res) => {
     }
 
     // Generar un código de verificación aleatorio
-    const codigo_verificacion = crypto.randomInt(100000, 999999).toString(); // Código de 6 dígitos
+    const codigo_verificacion = crypto.randomInt(1000, 10000).toString(); // Código de 6 dígitos
 
     // Consulta SQL para verificar si el correo existe
     const query = 'SELECT * FROM usuarios WHERE correo = ?';
@@ -467,6 +468,93 @@ routes.put('/updateUser/:id', (req, res) => {
     );
 });
 
+// Ruta para actualizar conductor
+routes.put('/updateConductor/:id', (req, res) => {
+    const userId = req.params.id;
+    const {
+        nombre,
+        apellido,
+        genero,
+        correo,
+        telefono,
+        direccion,
+        fechaNacimiento,
+        contraseña,
+        numeroLicencia,
+        idPlaca,
+        color,
+        marca,
+        modelo,
+        ano,
+        capacidadPasajeros,
+        fechaVencimiento
+    } = req.body;
+
+    // Verificar que los campos requeridos estén presentes
+    if (!nombre || !apellido || !genero || !correo || !numeroLicencia || !idPlaca) {
+        return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
+    }
+
+    // Consulta SQL para actualizar datos del conductor, vehículo y usuario
+    const updateQuery = `
+        UPDATE usuarios u
+        JOIN conductor c ON u.id = c.id_conductor
+        JOIN vehiculo v ON v.id_conductor = c.id_conductor
+        SET 
+            u.nombre = ?, 
+            u.apellido = ?, 
+            u.genero = ?, 
+            u.correo = ?, 
+            u.telefono = ?, 
+            u.direccion = ?, 
+            u.fecha_nacimiento = ?, 
+            u.contraseña = ?, 
+            c.numero_licencia = ?, 
+            c.fecha_vencimiento = ?, 
+            v.id_placa = ?, 
+            v.color = ?, 
+            v.marca = ?, 
+            v.modelo = ?, 
+            v.ano = ?, 
+            v.capacidad_pasajeros = ?
+        WHERE u.id = ? AND c.id_conductor = ? AND v.id_conductor = ?
+    `;
+
+    req.connection.query(
+        updateQuery,
+        [
+            nombre, 
+            apellido, 
+            genero, 
+            correo, 
+            telefono, 
+            direccion, 
+            fechaNacimiento, 
+            contraseña, 
+            numeroLicencia, 
+            fechaVencimiento, 
+            idPlaca, 
+            color, 
+            marca, 
+            modelo, 
+            ano, 
+            capacidadPasajeros, 
+            userId, 
+            userId, 
+            userId
+        ],
+        (err, result) => {
+            if (err) {
+                console.error('Error al actualizar el conductor:', err);
+                return res.status(500).json({ error: 'Error al actualizar el conductor' });
+            }
+
+            res.status(200).json({ message: 'Conductor actualizado correctamente.' });
+        }
+    );
+});
+
+
 // Ruta para obtener los datos de un pasajero por su ID
 routes.get('/getPassengerById/:id', (req, res) => {
     const passengerId = req.params.id;
@@ -492,39 +580,7 @@ routes.get('/getPassengerById/:id', (req, res) => {
 });
 
 
-// Ruta para actualizar un conductor
-routes.put('/updateConductor/:id', (req, res) => {
-    const id_conductor = req.params.id; // Obtener el ID del conductor desde la URL
-    const { numero_licencia, fecha_vencimiento } = req.body; // Obtener los datos del cuerpo de la solicitud
 
-    // Validar que se reciban todos los campos necesarios
-    if (!numero_licencia || !fecha_vencimiento) {
-        return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios: numero_licencia, fecha_vencimiento.' });
-    }
-
-    // Consulta SQL para actualizar el conductor
-    const query = `
-        UPDATE conductor
-        SET numero_licencia = ?, fecha_vencimiento = ?
-        WHERE id_conductor = ?
-    `;
-
-    // Ejecutar la consulta usando req.connection
-    req.connection.query(query, [numero_licencia, fecha_vencimiento, id_conductor], (err, result) => {
-        if (err) {
-            console.error('Error al actualizar el conductor:', err);
-            return res.status(500).json({ error: 'Error al actualizar el conductor' });
-        }
-
-        // Verificar si se actualizó algún registro
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Conductor no encontrado' });
-        }
-
-        // Devolver una respuesta de éxito
-        res.status(200).json({ message: 'Conductor actualizado exitosamente.' });
-    });
-});
 
 // Función para leer y preparar el template
 async function getEmailTemplate(templateData) {
@@ -698,6 +754,85 @@ routes.get('/usuariosid/:id', async (req, res) => {
 
     } catch (error) {
         console.error('Error al obtener usuario:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
+// Ruta para obtener todos los datos básicos de un conductor por ID
+routes.get('/conductor/:id', async (req, res) => {
+    const userId = req.params.id;
+    const connection = req.connection;
+
+    try {
+        // Query que obtiene todos los datos básicos del conductor y su vehículo
+        const query = `
+            SELECT 
+                u.id,
+                u.genero,
+                u.nombre,
+                u.apellido,
+                u.correo,
+                u.telefono,
+                u.direccion,
+                u.fecha_nacimiento as fechaNacimiento,
+                u.contraseña,
+                c.numero_licencia,
+                c.fecha_vencimiento,
+                v.id_placa,
+                v.marca,
+                v.modelo,
+                v.ano,
+                v.color,
+                v.capacidad_pasajeros
+            FROM usuarios u
+            LEFT JOIN conductor c ON u.id = c.id_conductor
+            LEFT JOIN vehiculo v ON c.id_conductor = v.id_conductor
+            WHERE u.id = ?
+        `;
+
+        const [results] = await connection.promise().query(query, [userId]);
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Conductor no encontrado'
+            });
+        }
+
+        const driver = results[0];
+        let response = {
+            success: true,
+            data: {
+                id: driver.id,
+                genero: driver.genero,
+                nombre: driver.nombre,
+                apellido: driver.apellido,
+                correo: driver.correo,
+                telefono: driver.telefono,
+                direccion: driver.direccion,
+                fechaNacimiento: driver.fechaNacimiento,
+                contraseña: driver.contraseña,
+                numero_licencia: driver.numero_licencia,
+                fecha_vencimiento: driver.fecha_vencimiento,
+                vehiculo: {
+                    id_placa: driver.id_placa,
+                    marca: driver.marca,
+                    modelo: driver.modelo,
+                    ano: driver.ano,
+                    color: driver.color,
+                    capacidad_pasajeros: driver.capacidad_pasajeros
+                }
+            }
+        };
+
+        res.json(response);
+
+    } catch (error) {
+        console.error('Error al obtener datos del conductor:', error);
         res.status(500).json({
             success: false,
             message: 'Error interno del servidor',
