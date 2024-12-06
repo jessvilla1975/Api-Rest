@@ -841,5 +841,73 @@ routes.get('/conductor/:id', async (req, res) => {
     }
 });
 
+routes.post('/viajes', (req, res) => {
+    const { 
+        id_conductor = null, // Default to null if not provided
+        id_usuario, // Renombrado desde "id" a "id_usuario"
+        origen, 
+        destino, 
+        fecha, 
+        horaviaje, 
+        distancia_recorrido, 
+        duracionViaje, 
+        costo_viaje 
+    } = req.body;
+
+    // Validar campos obligatorios
+    if (!id_usuario || !origen || !destino || !fecha || !horaviaje) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Faltan campos obligatorios' 
+        });
+    }
+
+    const query = `
+        INSERT INTO viaje (
+            id_conductor, 
+            id_usuario, 
+            origen, 
+            destino, 
+            fecha, 
+            horaviaje, 
+            distancia_recorrido, 
+            duracionViaje, 
+            costo_viaje, 
+            estado_viaje
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    req.connection.query(
+        query, 
+        [
+            id_conductor, 
+            id_usuario, // Actualizado
+            origen, 
+            destino, 
+            fecha, 
+            horaviaje, 
+            distancia_recorrido, 
+            duracionViaje, 
+            costo_viaje, 
+            'Pendiente' // Estado por defecto al crear un viaje
+        ], 
+        (err, result) => {
+            if (err) {
+                console.error('Error al crear el viaje:', err);
+                return res.status(500).json({ 
+                    success: false, 
+                    error: 'Error al crear el viaje' 
+                });
+            }
+
+            res.status(201).json({
+                success: true,
+                message: 'Viaje creado exitosamente',
+                id_viaje: result.insertId
+            });
+        }
+    );
+});
+
 
 module.exports = routes;

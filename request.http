@@ -25,7 +25,7 @@ POST http://localhost:9001/api/newUser
 Content-Type: application/json
 
 {
-        "id": 79,
+        "id": 3,
         "genero": "Femenino",
         "nombre": "jess",
         "apellido": "villa",
@@ -123,6 +123,35 @@ Content-Type: application/json
     "correo": "jess.villa@example.com",
     "telefono": "1234567890",
     "comentario": "Necesito ayuda con el registro en la aplicación"
+}
+
+### Solicitud para crear un nuevo viaje
+POST http://localhost:9001/api/viajes
+Content-Type: application/json
+
+{
+    "id_usuario": 3,
+    "origen": "Universidad del Valle Sede Tuluá, Carrera 27 entre Calles 23 y 24",
+    "destino": "Universidad del Valle Sede Buga, Calle 13 Nro. 100-00", 
+    "fecha": "2024-10-03",
+    "horaviaje": "14:30:00",
+    "distancia_recorrido": 7.5,
+    "duracionViaje": 40.6,
+    "costo_viaje": 12.50
+}
+
+POST http://localhost:9001/api/drivers
+Content-Type: application/json
+
+{
+    "id_usuario": 3,
+    "origen": "Universidad del Valle Sede Tuluá, Carrera 27 entre Calles 23 y 24",
+    "destino": "Universidad del Valle Sede Buga, Calle 13 Nro. 100-00", 
+    "fecha": "2024-10-03",
+    "horaviaje": "14:30:00",
+    "distancia_recorrido": 7.5,
+    "duracionViaje": 40.6,
+    "costo_viaje": 3500
 }
 //*********************  GET *********************//
 ### Solicitud para obtener todos los conductores
