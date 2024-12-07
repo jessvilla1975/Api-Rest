@@ -910,4 +910,37 @@ routes.post('/viajes', (req, res) => {
 });
 
 
+// Ruta para obtener historial de viajes de un pasajero
+routes.get('/historialViajes/:id_usuario', (req, res) => {
+    const userId = req.params.id_usuario;
+
+    // Consulta SQL para obtener los viajes de un pasajero con información adicional
+    const query = `
+        SELECT 
+            v.fecha, 
+            v.horaviaje AS hora_salida, 
+            ADDTIME(v.horaviaje, SEC_TO_TIME(v.duracionViaje * 60)) AS hora_llegada, 
+            v.origen, 
+            v.destino, 
+            CONCAT(u.nombre, ' ', u.apellido) AS conductor, 
+            v.costo_viaje AS costo 
+        FROM viaje v
+        LEFT JOIN usuarios u ON v.id_conductor = u.id
+        WHERE v.id_usuario = ?
+        ORDER BY v.fecha DESC, v.horaviaje DESC
+    `;
+
+    req.connection.query(query, [userId], (err, result) => {
+        if (err) {
+            console.error('Error al obtener los viajes:', err);
+            return res.status(500).json({ error: 'Error al obtener los viajes' });
+        }
+
+        // Devuelve los resultados en formato JSON
+        res.json(result);
+    });
+});
+
+
+
 module.exports = routes;

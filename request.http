@@ -126,21 +126,8 @@ Content-Type: application/json
 }
 
 ### Solicitud para crear un nuevo viaje
+
 POST http://localhost:9001/api/viajes
-Content-Type: application/json
-
-{
-    "id_usuario": 3,
-    "origen": "Universidad del Valle Sede Tuluá, Carrera 27 entre Calles 23 y 24",
-    "destino": "Universidad del Valle Sede Buga, Calle 13 Nro. 100-00", 
-    "fecha": "2024-10-03",
-    "horaviaje": "14:30:00",
-    "distancia_recorrido": 7.5,
-    "duracionViaje": 40.6,
-    "costo_viaje": 12.50
-}
-
-POST http://localhost:9001/api/drivers
 Content-Type: application/json
 
 {
@@ -165,5 +152,5 @@ GET https://api-rest-vo9r.onrender.com/api/vehiculos HTTP/1.1
 GET http://localhost:9001/api/usuariosid/3 HTTP/1.1
 
 
-        
-
+### SOlicitud historial de viajes
+GET http://localhost:9001/api/historialViajes/3 HTTP/1.1
