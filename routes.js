@@ -15,10 +15,26 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-
+async function getVerification(templateData) {
+    try {
+        let template = await fs.readFile(path.join(__dirname, 'emailTemplates/verification.html'), 'utf8');
+        
+        // Reemplazar las variables en el template
+        Object.keys(templateData).forEach(key => {
+            const regex = new RegExp(`{{${key}}}`, 'g');
+            template = template.replace(regex, templateData[key]);
+        });
+        
+        return template;
+    } catch (error) {
+        console.error('Error al leer el template:', error);
+        throw error;
+    }
+}
 
 // Ruta para nuevo usuario--------------------------------
-routes.post('/newUser', (req, res) => {
+// Ruta para nuevo usuario--------------------------------
+routes.post('/newUser', async (req, res) => {
     const { 
         id, 
         nombre, 
@@ -37,16 +53,15 @@ routes.post('/newUser', (req, res) => {
         return res.status(400).json({ error: 'Por favor, complete todos los campos obligatorios.' });
     }
 
-    // Primero, verificar si el correo ya existe
+    // Verificar si el correo ya existe
     const checkEmailQuery = 'SELECT correo FROM usuarios WHERE correo = ?';
-    
     req.connection.query(checkEmailQuery, [correo], (checkErr, checkResult) => {
         if (checkErr) {
             console.error('Error al verificar el correo:', checkErr);
             return res.status(500).json({ error: 'Error al verificar el correo' });
         }
 
-        // Si se encuentra un usuario con ese correo
+        // Si el correo ya está registrado
         if (checkResult.length > 0) {
             return res.status(400).json({ 
                 error: 'Este correo electrónico ya está registrado',
@@ -54,7 +69,7 @@ routes.post('/newUser', (req, res) => {
             });
         }
 
-        // Si el correo no existe, continuar con el registro
+        // Continuar con el registro
         const codigo_verificacion = crypto.randomInt(1000, 10000).toString();
         const userRole = rol || 'pasajero';
 
@@ -90,68 +105,47 @@ routes.post('/newUser', (req, res) => {
                 codigo_verificacion,
                 userRole
             ], 
-            (insertErr, result) => {
+            async (insertErr, result) => {
                 if (insertErr) {
                     console.error('Error al insertar el usuario:', insertErr);
                     return res.status(500).json({ error: 'Error al crear el usuario' });
                 }
 
-                // Configuración del correo
-                const mailOptions = {
-                    from: "campusrideapps@gmail.com",
-                    to: correo,
-                    subject: "Código de Verificación de Campus Ride",
-                    html: `
-                        <html>
-                            <head>
-                                <style>
-                                    body {
-                                        font-family: Arial, sans-serif;
-                                        background-color: #f4f4f4;
-                                        padding: 20px;
-                                    }
-                                    .container {
-                                        background-color: #fff;
-                                        padding: 20px;
-                                        border-radius: 8px;
-                                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                                    }
-                                    h1 {
-                                        color: #333;
-                                    }
-                                    .code {
-                                        font-size: 24px;
-                                        font-weight: bold;
-                                        color: #007BFF;
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <div class="container">
-                                    <h1>Código de Verificación de Campus Ride</h1>
-                                    <p>Hola, ${nombre}</p>
-                                    <p>Tu código de verificación es:</p>
-                                    <p class="code">${codigo_verificacion}</p>
-                                    <p>¡Gracias por unirte a nosotros!</p>
-                                    <p>Saludos,<br/>El equipo de Campus Ride</p>
-                                </div>
-                            </body>
-                        </html>
-                    `,
-                };
+                try {
+                    // Preparar datos para el template
+                    const templateData = {
+                        nombre,
+                        codigo_verificacion,
+                        correo
+                    };
 
-                transporter.sendMail(mailOptions, (mailErr, info) => {
-                    if (mailErr) {
-                        console.error('Error al enviar el correo:', mailErr);
-                        return res.status(500).json({ error: 'Error al enviar el correo de verificación' });
-                    }
+                    // Obtener el HTML del correo
+                    const htmlContent = await getVerification(templateData);
 
+                    // Configurar el correo
+                    const mailOptions = {
+                        from: "campusrideapps@gmail.com",
+                        to: correo,
+                        subject: 'Código de Verificación - CampusRide',
+                        html: htmlContent
+                    };
+
+                    // Enviar el correo
+                    await transporter.sendMail(mailOptions);
+
+                    // Respuesta exitosa
                     res.status(201).json({ 
                         message: 'Usuario creado exitosamente. Se ha enviado un código de verificación a tu correo.', 
                         userId: id,
                         rol: userRole
                     });
-                });
+
+                } catch (mailErr) {
+                    console.error('Error al enviar el correo:', mailErr);
+                    res.status(500).json({ 
+                        error: 'Usuario creado, pero ocurrió un problema al enviar el correo de verificación.' 
+                    });
+                }
             }
         );
     });
@@ -910,7 +904,8 @@ routes.post('/viajes', (req, res) => {
 });
 
 
-// Ruta para obtener historial de viajes de un pasajero
+// Ruta para obtener historial de viajes de un pasajero de la tabla de viajes
+
 routes.get('/historialViajes/:id_usuario', (req, res) => {
     const userId = req.params.id_usuario;
 
