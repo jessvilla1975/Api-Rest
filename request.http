@@ -140,6 +140,15 @@ Content-Type: application/json
     "duracionViaje": 40.6,
     "costo_viaje": 3500
 }
+
+### Solicitud para aceptar un viaje
+PUT http://localhost:9001/api/aceptarViaje/2
+Content-Type: application/json
+
+{
+    "id_conductor": 1
+}
+
 //*********************  GET *********************//
 ### Solicitud para obtener todos los conductores
 GET https://api-rest-vo9r.onrender.com/api/conductores HTTP/1.1
@@ -154,3 +163,7 @@ GET http://localhost:9001/api/usuariosid/3 HTTP/1.1
 
 ### SOlicitud historial de viajes
 GET http://localhost:9001/api/historialViajes/3 HTTP/1.1
+
+
+### Solicitud viajes disponibles
+GET http://localhost:9001/api/solicitudViajes HTTP/1.1

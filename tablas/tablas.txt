@@ -110,28 +110,41 @@ CREATE TABLE mesa_ayuda (
 );
 
 -- Inserción de datos
+-- Inserción de datos
 INSERT INTO usuarios (id, genero, nombre, apellido, correo, telefono, direccion, fecha_nacimiento, contraseña, rol)
 VALUES
 (1, 'Masculino', 'Juan', 'Pérez', 'juan.perez@example.com', '1234567890', 'Calle Falsa 123', '1990-01-01', 'contraseña123', 'conductor'),
-(2, 'Femenino', 'Ana', 'López', 'ana.lopez@example.com', '0987654321', 'Avenida Siempre Viva 742', '1995-05-15', '123123', 'pasajero');
+(2, 'Femenino', 'Ana', 'López', 'ana.lopez@example.com', '0987654321', 'Avenida Siempre Viva 742', '1995-05-15', '123123', 'pasajero'),
+(3, 'Masculino', 'Carlos', 'Martínez', 'carlos.martinez@example.com', '1122334455', 'Carrera 12 45-67', '1988-09-12', 'carlos123', 'conductor'),
+(4, 'Femenino', 'Laura', 'Gómez', 'laura.gomez@example.com', '5566778899', 'Calle 8 # 12-34', '1997-02-25', 'laura123', 'pasajero');
 
 INSERT INTO conductor (id_conductor, calificacion_conductor, estado_disponibilidad, numero_licencia, fecha_vencimiento)
 VALUES
-(1, 5, TRUE, 'LIC-123456', '2025-12-31');
+(1, 5, TRUE, 'LIC-123456', '2025-12-31'),
+(3, 4, TRUE, 'LIC-789101', '2026-05-15');
 
 INSERT INTO pasajero (id_pasajero, calificacion_pasajero)
 VALUES
-(2, 4);
+(2, 4),
+(4, 3);
 
 INSERT INTO vehiculo (id_placa, id_conductor, marca, modelo, ano, color, capacidad_pasajeros)
 VALUES
 ('ABC123', 1, 'Toyota', 'Corolla', '2020', 'Rojo', '5'),
-('DEF456', 1, 'Honda', 'Civic', '2021', 'Azul', '5');
+('GHI789', 3, 'Ford', 'Focus', '2022', 'Negro', '5');
 
+-- Inserción de solicitudes de viaje (para los pasajeros)
 INSERT INTO viaje (id_conductor, id_usuario, origen, destino, fecha, horaviaje, distancia_recorrido, duracionViaje, costo_viaje)
 VALUES
-(1, 2, 'Universidad del Valle Sede Tuluá', 'Universidad del Valle Sede Buga', '2024-10-03', '14:30:00', 7.5, 40.6, 3500);
+(1, 2, 'Universidad del Valle Sede Buga', 'UCEVA', '2024-12-10', '08:00:00', 15.0, 30.0, 4000),
+(1, 2, 'Universidad del Valle Sede Buga', 'Universidad Autónoma de Occidente', '2024-12-12', '10:30:00', 20.0, 40.0, 4500),
+(3, 4, 'Universidad del Valle Sede Buga', 'UCEVA', '2024-12-14', '09:00:00', 15.0, 30.0, 4000),
+(3, 4, 'Universidad del Valle Sede Buga', 'Universidad del Valle Sede Tuluá', '2024-12-16', '11:30:00', 12.0, 25.0, 3500);
 
+-- Inserción de historial de viajes para los pasajeros
 INSERT INTO historial_viajes_pasajero (id_usuario, id_viaje, id_conductor, origen, destino, fecha, hora_salida, costo_viaje)
 VALUES
-(2, 1, 1, 'Universidad del Valle Sede Tuluá', 'Universidad del Valle Sede Buga', '2024-10-03', '14:30:00', 3500);
+(2, 1, 1, 'Universidad del Valle Sede Buga', 'UCEVA', '2024-12-10', '08:00:00', 4000),
+(2, 2, 1, 'Universidad del Valle Sede Buga', 'Universidad Autónoma de Occidente', '2024-12-12', '10:30:00', 4500),
+(4, 3, 3, 'Universidad del Valle Sede Buga', 'UCEVA', '2024-12-14', '09:00:00', 4000),
+(4, 4, 3, 'Universidad del Valle Sede Buga', 'Universidad del Valle Sede Tuluá', '2024-12-16', '11:30:00', 3500);

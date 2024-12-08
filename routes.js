@@ -889,7 +889,7 @@ routes.post('/viajes', (req, res) => {
             distancia_recorrido, 
             duracionViaje, 
             costo_viaje, 
-            'Pendiente' // Estado por defecto al crear un viaje
+            'En proceso' // Estado por defecto al crear un viaje
         ], 
         (err, result) => {
             if (err) {
@@ -942,6 +942,70 @@ routes.get('/historialViajes/:id_usuario', (req, res) => {
     });
 });
 
+// Ruta para obtener las solicitudes de viajes en estado "En proceso"
+routes.get('/solicitudViajes', (req, res) => {
+    // Consulta SQL para obtener las solicitudes en estado "En proceso" y el nombre del usuario
+    const query = `
+        SELECT 
+            v.id_viaje,
+            CONCAT(u.nombre, ' ', u.apellido) AS usuario,
+            v.origen,
+            v.destino,
+            v.fecha,
+            v.horaviaje AS hora_salida,
+            v.estado_viaje,
+            v.costo_viaje
+        FROM viaje v
+        JOIN usuarios u ON v.id_usuario = u.id
+        WHERE v.estado_viaje = 'En proceso'
+        ORDER BY v.fecha DESC, v.horaviaje DESC
+    `;
+
+    req.connection.query(query, (err, result) => {
+        if (err) {
+            console.error('Error al obtener las solicitudes de viajes:', err);
+            return res.status(500).json({ error: 'Error al obtener las solicitudes de viajes' });
+        }
+
+        // Devuelve los resultados en formato JSON
+        res.json(result);
+    });
+});
+
+
+//Ruta para aceptar solicitud de viaje donde se actualiza el estado del viaje a "Aceptado" y en viajes id:conductor tambien se envia
+
+routes.put('/aceptarViaje/:id_viaje', (req, res) => {
+    const idViaje = req.params.id_viaje; // ID del viaje desde la URL
+    const { id_conductor } = req.body; // ID del conductor desde el cuerpo de la solicitud
+
+    if (!id_conductor) {
+        return res.status(400).json({ error: 'Se requiere el id_conductor para aceptar el viaje.' });
+    }
+
+    // Consulta SQL para actualizar el estado del viaje y asignar el id_conductor
+    const query = `
+        UPDATE viaje
+        SET estado_viaje = 'Aceptado', id_conductor = ?
+        WHERE id_viaje = ? AND estado_viaje = 'En proceso'
+    `;
+
+    req.connection.query(query, [id_conductor, idViaje], (err, result) => {
+        if (err) {
+            console.error('Error al aceptar el viaje:', err);
+            return res.status(500).json({ error: 'Error al aceptar el viaje.' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Viaje no encontrado o ya no está en estado "En proceso".' });
+        }
+
+        res.json({ message: 'Viaje aceptado exitosamente.' });
+    });
+});
+
+
+  
 
 
 module.exports = routes;
