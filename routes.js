@@ -32,7 +32,7 @@ async function getVerification(templateData) {
     }
 }
 
-// Ruta para nuevo usuario--------------------------------
+
 // Ruta para nuevo usuario--------------------------------
 routes.post('/newUser', async (req, res) => {
     const { 
@@ -271,7 +271,26 @@ routes.post('/newVehiculo', (req, res) => {
 
 
 // Ruta para enviar código de verificación------------------------------
-routes.post('/sendVerificationCode', (req, res) => {
+
+async function getRecoveryTemplate(templateData) {
+    try {
+        let template = await fs.readFile(path.join(__dirname, 'emailTemplates/recoveryPassword.html'), 'utf8');
+        
+        // Reemplazar las variables en el template
+        Object.keys(templateData).forEach(key => {
+            const regex = new RegExp(`{{${key}}}`, 'g');
+            template = template.replace(regex, templateData[key]);
+        });
+        
+        return template;
+    } catch (error) {
+        console.error('Error al leer el template recoveryPassword:', error);
+        throw error;
+    }
+}
+
+// Ruta para enviar código de verificación con recoveryPassword.html
+routes.post('/sendVerificationCode', async (req, res) => {
     const { correo } = req.body;
 
     // Validar que se reciba el correo
@@ -280,88 +299,75 @@ routes.post('/sendVerificationCode', (req, res) => {
     }
 
     // Generar un código de verificación aleatorio
-    const codigo_verificacion = crypto.randomInt(1000, 10000).toString(); // Código de 6 dígitos
+    const codigo_verificacion = crypto.randomInt(1000, 10000).toString(); // Código de 4 dígitos
 
     // Consulta SQL para verificar si el correo existe
     const query = 'SELECT * FROM usuarios WHERE correo = ?';
 
-    // Ejecutar la consulta usando req.connection
-    req.connection.query(query, [correo], (err, result) => {
-        if (err) {
-            console.error('Error al consultar el correo:', err);
-            return res.status(500).json({ error: 'Error al consultar el correo' });
-        }
+    try {
+        req.connection.query(query, [correo], async (err, result) => {
+            if (err) {
+                console.error('Error al consultar el correo:', err);
+                return res.status(500).json({ error: 'Error al consultar el correo' });
+            }
 
-        if (result.length > 0) {
-            // Si el correo existe, actualizar el código de verificación en la base de datos
-            const updateQuery = 'UPDATE usuarios SET codigo_verificacion = ? WHERE correo = ?';
+            if (result.length > 0) {
+                // Si el correo existe, actualizar el código de verificación en la base de datos
+                const updateQuery = 'UPDATE usuarios SET codigo_verificacion = ? WHERE correo = ?';
 
-            req.connection.query(updateQuery, [codigo_verificacion, correo], (updateErr) => {
-                if (updateErr) {
-                    console.error('Error al actualizar el código de verificación:', updateErr);
-                    return res.status(500).json({ error: 'Error al actualizar el código de verificación' });
-                }
-
-                // Enviar correo de verificación
-                const mailOptions = {
-                    from: "campusrideapps@gmail.com",
-                    to: correo,
-                    subject: "Restablecimiento de contraseña de Campus Ride",
-                    html: `
-                      <html>
-                        <head>
-                          <style>
-                            body {
-                              font-family: Arial, sans-serif;
-                              background-color: #f4f4f4;
-                              padding: 20px;
-                            }
-                            .container {
-                              background-color: #fff;
-                              padding: 20px;
-                              border-radius: 8px;
-                              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                            }
-                            h1 {
-                              color: #333;
-                            }
-                            .code {
-                              font-size: 24px;
-                              font-weight: bold;
-                              color: #007BFF;
-                            }
-                          </style>
-                        </head>
-                        <body>
-                          <div class="container">
-                            <h1>Código de Verificación de Campus Ride</h1>
-                            <p>Hola, ${result[0].nombre}</p>
-                            <p>Tu código de verificación es:</p>
-                            <p class="code">${codigo_verificacion}</p>
-                            <p>¡Escribe el código para restablecer tu contraseña!</p>
-                            <p>Saludos,<br/>El equipo de Campus Ride</p>
-                          </div>
-                        </body>
-                      </html>
-                    `,
-                };
-
-                transporter.sendMail(mailOptions, (error) => {
-                    if (error) {
-                        console.error('Error al enviar el correo:', error);
-                        return res.status(500).json({ error: 'Error al enviar el correo de verificación' });
+                req.connection.query(updateQuery, [codigo_verificacion, correo], async (updateErr) => {
+                    if (updateErr) {
+                        console.error('Error al actualizar el código de verificación:', updateErr);
+                        return res.status(500).json({ error: 'Error al actualizar el código de verificación' });
                     }
 
-                    // Devolver una respuesta de éxito
-                    res.status(200).json({ message: 'Se ha enviado un código de verificación a tu correo.' });
+                    try {
+                        // Preparar datos para el template
+                        const templateData = {
+                            nombre: result[0].nombre,
+                            codigo_verificacion
+                        };
+
+                        // Obtener el HTML del correo desde recoveryPassword.html
+                        const htmlContent = await getRecoveryTemplate(templateData);
+
+                        // Configurar el correo
+                        const mailOptions = {
+                            from: "campusrideapps@gmail.com",
+                            to: correo,
+                            subject: "Restablecimiento de contraseña de Campus Ride",
+                            html: htmlContent
+                        };
+
+                        // Enviar el correo
+                        await transporter.sendMail(mailOptions);
+
+                        // Devolver una respuesta de éxito
+                        res.status(200).json({ 
+                            message: 'Se ha enviado un código de verificación a tu correo.' 
+                        });
+
+                    } catch (mailErr) {
+                        console.error('Error al enviar el correo:', mailErr);
+                        res.status(500).json({ 
+                            error: 'Código de verificación actualizado, pero ocurrió un problema al enviar el correo.' 
+                        });
+                    }
                 });
-            });
-        } else {
-            // El correo no existe
-            res.status(404).json({ error: 'El correo electrónico no está registrado.' });
-        }
-    });
+            } else {
+                // El correo no existe
+                res.status(404).json({ error: 'El correo electrónico no está registrado.' });
+            }
+        });
+    } catch (error) {
+        console.error('Error en el proceso:', error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+    }
 });
+
+
+
+
 
 routes.post('/verifyCode', (req, res) => {
     const { correo, codigo_verificacion } = req.body;
