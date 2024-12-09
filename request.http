@@ -170,3 +170,6 @@ GET http://localhost:9001/api/solicitudViajes HTTP/1.1
 
 ### Solicitud ubicacion
 GET http://localhost:9001/api/ubicacion/1 HTTP/1.1
+
+###Ruta para obtener las coordenadas de un viaje por ID
+GET http://localhost:9001/api/coordenadas-viaje/5 HTTP/1.1

@@ -1100,7 +1100,49 @@ routes.get('/ultimo-viaje/:id_usuario', async (req, res) => {
 });
 
 
-  
+// Ruta para obtener las coordenadas de un viaje por ID
+routes.get('/coordenadas-viaje/:id_viaje', async (req, res) => {
+    const { id_viaje } = req.params;
+
+    const query = `
+        SELECT 
+            id_usuario,
+            id_viaje,
+            origen_latitud,
+            origen_longitud,
+            destino_latitud,
+            destino_longitud,
+            nombre_origen,
+            nombre_destino,
+            fecha_registro
+        FROM ubicacion
+        WHERE id_viaje = ?
+    `;
+
+    req.connection.query(query, [id_viaje], (err, results) => {
+        if (err) {
+            console.error('Error al obtener las coordenadas del viaje:', err);
+            return res.status(500).json({
+                success: false,
+                error: 'Error al recuperar las coordenadas del viaje'
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'No se encontraron coordenadas para este viaje'
+            });
+        }
+
+        // Wrap the first result in a 'data' object to match the expected structure
+        res.status(200).json({
+            success: true,
+            data: results[0]  // This ensures the coordinates are under a 'data' key
+        });
+    });
+});
+
 
 
 module.exports = routes;
