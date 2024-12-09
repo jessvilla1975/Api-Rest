@@ -167,3 +167,6 @@ GET http://localhost:9001/api/historialViajes/3 HTTP/1.1
 
 ### Solicitud viajes disponibles
 GET http://localhost:9001/api/solicitudViajes HTTP/1.1
+
+### Solicitud ubicacion
+GET http://localhost:9001/api/ubicacion/1 HTTP/1.1

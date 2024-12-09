@@ -1004,10 +1004,12 @@ routes.put('/aceptarViaje/:id_viaje', (req, res) => {
     });
 });
 
+// Add this to your existing routes file
 
 routes.post('/ubicacion', async (req, res) => {
     const { 
         id_usuario,
+        id_viaje, // Campo opcional
         origen_latitud, 
         origen_longitud, 
         destino_latitud, 
@@ -1016,7 +1018,7 @@ routes.post('/ubicacion', async (req, res) => {
         nombre_destino
     } = req.body;
 
-    // Validar que se reciban todos los campos necesarios
+    // Validaciones
     if (!id_usuario || 
         origen_latitud === undefined || 
         origen_longitud === undefined || 
@@ -1028,6 +1030,7 @@ routes.post('/ubicacion', async (req, res) => {
     const insertQuery = `
         INSERT INTO ubicacion (
             id_usuario, 
+            id_viaje, 
             origen_latitud, 
             origen_longitud, 
             destino_latitud, 
@@ -1035,13 +1038,14 @@ routes.post('/ubicacion', async (req, res) => {
             nombre_origen,
             nombre_destino,
             fecha_registro
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `;
 
     req.connection.query(
         insertQuery, 
         [
             id_usuario, 
+            id_viaje || null, // Usar NULL si no se proporciona id_viaje
             origen_latitud, 
             origen_longitud, 
             destino_latitud, 
@@ -1051,18 +1055,49 @@ routes.post('/ubicacion', async (req, res) => {
         ], 
         (insertErr, result) => {
             if (insertErr) {
-                console.error('Error al insertar la ubicación:', insertErr);
-                return res.status(500).json({ error: 'Error al guardar la ubicación' });
+                return res.status(500).json({ error: 'Error al insertar los datos.', details: insertErr });
             }
-
-            res.status(201).json({ 
-                message: 'Ubicación guardada exitosamente', 
-                ubicacionId: result.insertId 
-            });
+            res.status(201).json({ message: 'Ubicación registrada exitosamente.', id: result.insertId });
         }
     );
 });
 
+
+
+// Ruta para obtener el último ID de viaje
+routes.get('/ultimo-viaje/:id_usuario', async (req, res) => {
+    const { id_usuario } = req.params;
+
+    const query = `
+        SELECT id_viaje 
+        FROM viaje 
+        WHERE id_usuario = ? 
+        ORDER BY id_viaje DESC 
+        LIMIT 1
+    `;
+
+    req.connection.query(query, [id_usuario], (err, results) => {
+        if (err) {
+            console.error('Error al obtener el último viaje:', err);
+            return res.status(500).json({ 
+                success: false, 
+                error: 'Error al recuperar el último viaje' 
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'No se encontraron viajes para este usuario' 
+            });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            id_viaje: results[0].id_viaje 
+        });
+    });
+});
 
 
   
