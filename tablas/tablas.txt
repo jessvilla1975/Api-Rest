@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS pasajero;
 DROP TABLE IF EXISTS conductor;
 DROP TABLE IF EXISTS mesa_ayuda;
 DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS ubicacion;
 
 -- Tabla usuarios
 CREATE TABLE usuarios (
@@ -96,6 +97,21 @@ CREATE TABLE historial_viajes_pasajero (
     FOREIGN KEY (id_viaje) REFERENCES viaje (id_viaje),
     FOREIGN KEY (id_conductor) REFERENCES conductor (id_conductor)
 );
+
+-- Crear la tabla ubicacion
+CREATE TABLE ubicacion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,  -- Cambiar VARCHAR(255) a INT
+    origen_latitud DECIMAL(10, 8) NOT NULL,
+    origen_longitud DECIMAL(11, 8) NOT NULL,
+    destino_latitud DECIMAL(10, 8) NOT NULL,
+    destino_longitud DECIMAL(11, 8) NOT NULL,
+    nombre_origen VARCHAR(255),
+    nombre_destino VARCHAR(255),
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
+
 
 -- Tabla mesa_ayuda
 CREATE TABLE mesa_ayuda (

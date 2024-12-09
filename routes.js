@@ -1005,6 +1005,66 @@ routes.put('/aceptarViaje/:id_viaje', (req, res) => {
 });
 
 
+routes.post('/ubicacion', async (req, res) => {
+    const { 
+        id_usuario,
+        origen_latitud, 
+        origen_longitud, 
+        destino_latitud, 
+        destino_longitud,
+        nombre_origen,
+        nombre_destino
+    } = req.body;
+
+    // Validar que se reciban todos los campos necesarios
+    if (!id_usuario || 
+        origen_latitud === undefined || 
+        origen_longitud === undefined || 
+        destino_latitud === undefined || 
+        destino_longitud === undefined) {
+        return res.status(400).json({ error: 'Por favor, proporcione todos los datos de ubicación necesarios.' });
+    }
+
+    const insertQuery = `
+        INSERT INTO ubicacion (
+            id_usuario, 
+            origen_latitud, 
+            origen_longitud, 
+            destino_latitud, 
+            destino_longitud,
+            nombre_origen,
+            nombre_destino,
+            fecha_registro
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+    `;
+
+    req.connection.query(
+        insertQuery, 
+        [
+            id_usuario, 
+            origen_latitud, 
+            origen_longitud, 
+            destino_latitud, 
+            destino_longitud,
+            nombre_origen,
+            nombre_destino
+        ], 
+        (insertErr, result) => {
+            if (insertErr) {
+                console.error('Error al insertar la ubicación:', insertErr);
+                return res.status(500).json({ error: 'Error al guardar la ubicación' });
+            }
+
+            res.status(201).json({ 
+                message: 'Ubicación guardada exitosamente', 
+                ubicacionId: result.insertId 
+            });
+        }
+    );
+});
+
+
+
   
 
 
