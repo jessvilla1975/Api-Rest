@@ -942,6 +942,38 @@ routes.get('/historialViajes/:id_usuario', (req, res) => {
     });
 });
 
+
+// Ruta para obtener historial de viajes del conductor
+routes.get('/historialViajesConductor/:id_conductor', (req, res) => {
+    const conductorId = req.params.id_conductor;
+
+    // Consulta SQL para obtener el historial de viajes de un conductor con información adicional
+    const query = `
+        SELECT 
+            v.fecha, 
+            v.horaviaje AS hora_salida, 
+            ADDTIME(v.horaviaje, SEC_TO_TIME(v.duracionViaje * 60)) AS hora_llegada, 
+            v.origen, 
+            v.destino, 
+            CONCAT(u.nombre, ' ', u.apellido) AS pasajero, 
+            v.costo_viaje AS costo 
+        FROM viaje v
+        LEFT JOIN usuarios u ON v.id_usuario = u.id
+        WHERE v.id_conductor = ?
+        ORDER BY v.fecha DESC, v.horaviaje DESC
+    `;
+
+    req.connection.query(query, [conductorId], (err, result) => {
+        if (err) {
+            console.error('Error al obtener el historial de viajes:', err);
+            return res.status(500).json({ error: 'Error al obtener el historial de viajes' });
+        }
+
+        // Devuelve los resultados en formato JSON
+        res.json(result);
+    });
+});
+
 // Ruta para obtener las solicitudes de viajes en estado "En proceso"
 routes.get('/solicitudViajes', (req, res) => {
     // Consulta SQL para obtener las solicitudes en estado "En proceso" y el nombre del usuario

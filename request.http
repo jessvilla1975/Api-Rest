@@ -164,6 +164,8 @@ GET http://localhost:9001/api/usuariosid/3 HTTP/1.1
 ### SOlicitud historial de viajes
 GET http://localhost:9001/api/historialViajes/3 HTTP/1.1
 
+### SOlicitud historial de viajes conductor
+GET http://localhost:9001/api/historialViajesConductor/1 HTTP/1.1
 
 ### Solicitud viajes disponibles
 GET http://localhost:9001/api/solicitudViajes HTTP/1.1
